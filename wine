@@ -1,0 +1,84 @@
+#!/bin/bash
+rt="$HOME/.local/share/Steam/ubuntu12_32/steam-runtime/run.sh"
+lrt="$HOME/.local/share/exec/runtime/run.sh"
+ARCH=""
+RUNTIME=""
+#WINE=""
+VER="1.3.2"
+
+function help() {
+	echo "Usage: wine PROGRAM [ARGUMENTS...]  		Run the specified program
+       wine --h			     		Display wine script help
+       wine --ver				Display wine script version
+       wine --help                   		Display wine help and exit
+       wine --version               		Output version information and exit
+       wine --patches               		Output patch information and exit
+       wine --check-libs            		Checks if shared libs are installed
+       wine --gtk PROGRAM [ARGUMENTS...] 	Run the gtk wineprefix picker
+       wine --N or --new-prefix	     		New prefix
+       
+       WINEPREFIX=/prefix/path			Use specific prefix
+       WINEARCH=wine32				Use wine 32bit prefix
+       ARCH=32					Use 32bit wine bin
+       RUNTIME=none | local | steam		Use specific runtime (default -- local)
+       WINEDLLOVERRIDES=[dlls]			Override dlls, e.g.:
+						'd3dx9=n,b;C:\user\d3dx9=b;...',
+						n -- native, b -- blutin
+       WINEDEBUG=[channels]			Use debug, e.g.: +all,-relay; warn+heap
+       WINE=[wine version]			Use specific wine version
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY (c) 2015 Volk_Milit"
+}
+
+if [ "$1" = "" ]; then
+	help
+	exit 0
+elif [ "$1" = "--h" ]; then
+	help 
+	exit 0
+elif [ "$1" = "--ver" ]; then
+	echo "WINE helper version is $VER"
+	exit 0
+elif [[ "$1" = "--N" || "$1" = "--new-prefix" ]]; then
+	WINEPREFIX=$WINEPREFIX $w wineboot
+	exit 0
+fi
+
+#FIX ME!
+if [[ ! -z `export | grep 'ARCH'` ]]; then
+	ww="wine"
+	echo "msg: Use 32bit wine"
+else
+	ww="wine64"
+fi
+
+wine_ver_get=`ls /opt | sed '/wine/!d; $!d'`
+w="/opt/"$wine_ver_get"/bin/$ww"
+
+if [ "$RUNTIME" = "none" ]; then
+	lrt=""
+	echo "msg: Use NO runtime"
+elif [ "$RUNTIME" = "steam" ]; then
+	lrt=$rt
+	echo "msg: Use Steam runtime"
+elif [[ "$RUNTIME" = "local" || -z "$RUNTIME" ]]; then
+	echo "msg: Use local runtime (by default)"
+else
+	echo "warn: I don't know this runtime. Use default runtime (local)"
+fi
+
+if [[ -z `export | grep 'WINEPREFIX'` ]] && [ "$1" = "--gtk" ]; then
+	ans=$(zenity --list --column="Name" --title="Choose prefix to use"\
+	`ls -ld $HOME/.local/share/.* | awk '{print $9}' | sed 's/\/home\/'$USER'\/.local\/share\///; s/.//'`)
+	if [ ! -z $ans ]; then	
+		echo "msg: running wine verion $wine_ver_get"
+		WINEPREFIX=$WINEPREFIX $lrt $w $2
+	fi
+elif [[ -z `export | grep 'WINEPREFIX'` ]]; then
+	echo "msg: running wine verion $wine_ver_get"
+	WINEPREFIX="$HOME/.local/share/.wine" $lrt $w $1
+else
+	echo "msg: running wine verion $wine_ver_get"
+	$w $1
+fi
