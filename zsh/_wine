@@ -3,7 +3,7 @@
 _wine() {
   local commands
   commands=(
-	'-h:See wine script help'
+	'--h:See wine script help'
     '--help:Display help and exit'
     '--version:Output version information and exit'
     '--patches:Output patch information and exit'
