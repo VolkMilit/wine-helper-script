@@ -5,13 +5,15 @@ _wine() {
   commands=(
 	'--h:See wine script help'
     '--help:Display help and exit'
+    '--ver:Display wine script version'
     '--version:Output version information and exit'
     '--patches:Output patch information and exit'
     '--check-libs:Checks if shared libs are installed'
-    '--gtk:Use gtk to choose wine prefix'
-    'winecfg:Wine configure'
-    'regedit:Wine RegEdit (c)'
-    'uninstaller:Wine uninstalletion program'
+    '--new-prefix:New clear wine prefix'
+    '--check-wine-version:Check if wine-starging need to be updated'
+    'winecfg:Wine configure panel'
+    'regedit:Wine regedit (registery edit program)'
+    'uninstaller:Uninstall wine program(s) (uninstallation panel)'
     $(ls | grep exe)
   )
 

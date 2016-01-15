@@ -1,22 +1,30 @@
 #!/bin/bash
 rt="$HOME/.local/share/Steam/ubuntu12_32/steam-runtime/run.sh"
-lrt="$HOME/.local/share/exec/runtime/run.sh"
-VER="1.4.0"
+lrt="runtime"
 
-function help() {
+dir="/opt"
+
+wine_ver_get=`ls $dir | sed '/wine/!d; $!d'` # get the lasted version of wine in dir, e.g. wine_1.8.0
+wine_path="/opt/"$wine_ver_get"/bin/"
+
+VER="1.5.0"
+
+function help() 
+{
 	echo "Usage: wine PROGRAM [ARGUMENTS...]  		Run the specified program
        wine --h			     		Display wine script help
        wine --ver				Display wine script version
+       wine --version				Display (lastes you have) wine version
        wine --help                   		Display wine help and exit
        wine --version               		Output version information and exit
        wine --patches               		Output patch information and exit
        wine --check-libs            		Checks if shared libs are installed
-       wine --gtk PROGRAM [ARGUMENTS...] 	Run the gtk wineprefix picker
        wine --new-prefix	     		New prefix
+       wine --check-wine-version		Check if wine-starging need to be updated
        
        WINEPREFIX=/prefix/path			Use specific prefix
        WINEARCH=win32				Use wine 32bit prefix
-       ARCH=win32					Use 32bit wine bin
+       ARCH=win32				Use 32bit wine binaries
        RUNTIME=none | local | steam		Use specific runtime (default -- local)
        WINEDLLOVERRIDES=[dlls]			Override dlls, e.g.:
 						'd3dx9=n,b;C:\user\d3dx9=b;...',
@@ -28,6 +36,119 @@ This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY (c) 2015 Volk_Milit"
 }
 
+function yesno()
+{
+	read ans
+		
+	case $ans in
+		"no") rm /tmp/wine-staging.html; exit 0;;
+		"n") rm /tmp/wine-staging.html; exit 0;;
+		"yes") getLastesWine;;
+		"y") getLastesWine;;
+		*) echo "Put (y)es or (n)o!"; yesno;;
+	esac
+}
+
+function checkWineVersion()
+{
+	# get wine-staging page
+	wget -qO - http://cdn.fds-team.de/stable/debian/pool/main/w/wine-staging/ > /tmp/wine-staging.html
+	
+	v=$(cat /tmp/wine-staging.html | sed -e :a -e 's/<[^>]*>//g;/</N;//ba' | cut -f 1 -d ' ' | sed '/dev/d;/dbg/d;/winehq/d;/compat/d'\
+ | grep `lsb_release --codename | cut -f 2` | tail -n 4 | sed '3!D' | sed -E 's/amd64//g;s/[^.0-9]//g' | rev | cut -c 2- | rev)
+	vv=$(ls /opt | grep wine | tail -n 1 | sed -E 's/amd64//g;s/[^.0-9]//g' | cut -f 1-10)
+ 
+	if [ $v = $vv ]; then
+		echo "You have lastes wine version"
+		rm /tmp/wine-staging.html
+		exit 0
+	else
+		echo "New version are avalable! Do you want to download it?"
+		yesno
+	fi
+}
+
+function getLastesWine()
+{	
+	echo "================================"
+	echo "Downloading lastes wine-staging"
+	echo "================================"
+	echo -e "\n"
+	echo "Downloading and parsing page..."
+	
+	# remove all html tegs, remove all dbg and dev versions, get Debian codename
+	# P.S. sorry for this duck tape :/ I'm too lazy, fix later, mb
+	wineVersionAmd64=$(cat /tmp/wine-staging.html | sed -e :a -e 's/<[^>]*>//g;/</N;//ba' | cut -f 1 -d ' ' | sed '/dev/d;/dbg/d;/winehq/d;/compat/d'\
+	 | grep `lsb_release --codename | cut -f 2` | tail -n 4 | sed '3!D')
+	wineVersionAmd64Libs=$(cat /tmp/wine-staging.html | sed -e :a -e 's/<[^>]*>//g;/</N;//ba' | cut -f 1 -d ' ' | sed '/dev/d;/dbg/d;/winehq/d;/compat/d'\
+	 | grep `lsb_release --codename | cut -f 2` | tail -n 4 | sed '1!D')
+	wineVersioni386=$(cat /tmp/wine-staging.html | sed -e :a -e 's/<[^>]*>//g;/</N;//ba' | cut -f 1 -d ' ' | sed '/dev/d;/dbg/d;/winehq/d;/compat/d'\
+	 | grep `lsb_release --codename | cut -f 2` | tail -n 4 | sed '4!D')
+	wineVersioni386Libs=$(cat /tmp/wine-staging.html | sed -e :a -e 's/<[^>]*>//g;/</N;//ba' | cut -f 1 -d ' ' | sed '/dev/d;/dbg/d;/winehq/d;/compat/d'\
+	 | grep `lsb_release --codename | cut -f 2` | tail -n 4 | sed '2!D')
+	
+	echo -e "Done!\nDonwloading and unpaking wine..."
+	
+	dir="/tmp/wine-staging/"
+	
+	mkdir $dir
+	
+	if [[ ! -z `lsb_release | grep amd64` ]]; then
+		echo "Script detected, that your system is amd64, so downloading 64bit wine."
+		echo "Downloading wine..."
+		# getting wine itself
+		touch $dir$wineVersionAmd64
+		wget -qO - http://cdn.fds-team.de/stable/debian/pool/main/w/wine-staging/$wineVersionAmd64 > $dir$wineVersionAmd64
+		dpkg -x $dir$wineVersionAmd64 $dir
+		rm $dir$wineVersionAmd64
+		
+		echo "Downloading libs..."
+		# getting libs both 32x and 64x
+		touch $dir$wineVersionAmd64Libs
+		wget -qO - http://cdn.fds-team.de/stable/debian/pool/main/w/wine-staging/$wineVersioni386Libs > $dir$wineVersionAmd64Libs
+		dpkg -x $dir$wineVersionAmd64Libs $dir
+		rm $dir$wineVersionAmd64Libs
+		
+		touch $dir$wineVersioni386Libs
+		wget -qO - http://cdn.fds-team.de/stable/debian/pool/main/w/wine-staging/$wineVersionAmd64Libs > $dir$wineVersioni386Libs
+		dpkg -x $dir$wineVersioni386Libs $dir
+		rm $dir$wineVersioni386Libs
+	else
+		echo "Script detected, that your system is i386, so downloading 32bit wine."
+		echo "Downloading wine..."
+		touch $dir$wineVersioni386
+		wget -qO - http://cdn.fds-team.de/stable/debian/pool/main/w/wine-staging/$wineVersioni386 > $dir$wineVersioni386
+		dpkg -x $dir$wineVersioni386 $dir
+		rm $dir$wineVersioni386
+		
+		echo "Downloading libs..."
+		touch $dir$wineVersioni386Libs
+		wget -qO - http://cdn.fds-team.de/stable/debian/pool/main/w/wine-staging/$wineVersioni386Libs > $dir$wineVersioni386Libs
+		dpkg -x $dir$wineVersioni386Libs $dir
+		rm $dir$wineVersioni386Libs
+	fi
+	
+	echo "Removing temporary data..."
+	echo "Now script ask for su password (using sudo):"
+	sleep 2
+	sudo mv $dir"/opt/wine-staging" "/opt/wine_"$v
+	
+	rm -rf "/tmp/wine-staging"
+	
+	rm /tmp/wine-staging.html
+	
+	echo "All done! Now you wine version on 20% cooler!"
+
+}
+
+if [ ! -z "$ARCH" ]; then
+	ww="wine"
+	echo "msg: Use 32bit wine"
+else
+	ww="wine64"
+	echo "msg: Use 64bit wine (by default)"
+fi
+
 if [ "$1" = "" ]; then
 	help
 	exit 0
@@ -38,50 +159,37 @@ elif [ "$1" = "--ver" ]; then
 	echo "WINE helper version is $VER"
 	exit 0
 elif [[ "$1" = "--N" || "$1" = "--new-prefix" ]]; then
-	WINEPREFIX=$WINEPREFIX $w wineboot
+	WINEPREFIX=$WINEPREFIX $wine_path$ww wineboot
 	exit 0
+elif [ "$1" = "--check-wine-version" ]; then
+	checkWineVersion
+	exit 0;
 fi
 
-if [ ! -z "$ARCH" ]; then
-	ww="wine"
-	echo "msg: Use 32bit wine"
-else
-	ww="wine64"
-fi
-
-wine_ver_get=`ls /opt | sed '/wine/!d; $!d'`
-w="/opt/"$wine_ver_get"/bin/$ww"
-
-case "$RUNTIME" in
-"none")
+if [[ `which runtime` = "runtime not found" || ! -f $rt ]]; then
+	echo "warn: No runtime found! Use no runtime, some 32x bit application(s) may work incorrectly if you don't have 32bit libraries in your system."
 	lrt=""
-	echo "msg: Use NO runtime";;
-"steam")
-	lrt=$rt
-	echo "msg: Use Steam runtime";;
-"")
-	echo "msg: Use local runtime (by default)";;
-"local")
-	echo "msg: Use local runtime (by default)";;
-*)
-	echo "warn: I don't know this runtime. Use default runtime (local)"
-esac
+else
+	case "$RUNTIME" in
+	"none")
+		lrt=""
+		echo "msg: Use NO runtime";;
+	"steam")
+		lrt=$rt
+		echo "msg: Use Steam runtime";;
+	"")
+		echo "msg: Use local runtime (by default)";;
+	"local")
+		echo "msg: Use local runtime (by default)";;
+	*)
+		echo "warn: I don't know this runtime. Use default runtime (local)"
+	esac
+fi
 
-if [[ -z "$WINEPREFIX" ]] && [ "$1" = "--gtk" ]; then
-
-	ans=$(zenity --list --column="Name" --title="Choose prefix to use"\
-	`ls -a $HOME/.local/share/wine_prefix/ | sed 's/\/home\/'$USER'\/.local\/share\/wine_prefix\///' | tr -d '.' | xargs`)
-	
-	if [ $ans ]; then	
-		echo "msg: running wine verion $wine_ver_get"
-		ans=`echo $ans | sed 's/|//g'`
-		WINEPREFIX=$HOME/.local/share/wine_prefix/.$ans $lrt $w $2
-	fi
-	
-elif [ -z "$WINEPREFIX" ]; then
+if [ -z "$WINEPREFIX" ]; then
 	echo "msg: running wine verion $wine_ver_get"
-	WINEPREFIX="$HOME/.local/share/.wine" $lrt $w $1
+	WINEPREFIX="$HOME/.local/share/.wine" $lrt $wine_path$ww $1
 else
 	echo "msg: running wine verion $wine_ver_get"
-	$w $1
+	$wine_path$ww $1
 fi
