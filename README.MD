@@ -1,4 +1,4 @@
-# wine script v1.5.0
+# wine script v1.5.1
 
 Just a little script, debian package and a zsh compiletion module for my personal use.
 
