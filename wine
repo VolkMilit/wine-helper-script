@@ -4,10 +4,10 @@ lrt="runtime"
 
 dir="/opt"
 
-wine_ver_get=`ls $dir | sed '/wine/!d; $!d'` # get the lasted version of wine in dir, e.g. wine_1.8.0
+wine_ver_get=`ls $dir | sort --version-sort | sed '/wine/!d; $!d'` # get the lasted version of wine in dir, e.g. wine_1.8.0
 wine_path="/opt/"$wine_ver_get"/bin/"
 
-VER="1.5.0"
+VER="1.5.1"
 
 function help() 
 {
