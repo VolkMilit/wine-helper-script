@@ -1,13 +1,22 @@
 #!/bin/bash
-rt="$HOME/.local/share/Steam/ubuntu12_32/steam-runtime/run.sh"
-lrt="runtime"
+conf=$HOME/.config/wine_helper/settings.conf
 
+VER="1.6.0"
+
+RUNTIME="$HOME/.steam/runtime/run.sh"
 dir="/opt"
+default_prefix=".wine64"
+wine_prefixes_dir="$HOME/.local/share/wine_prefix/"$default_prefix
+
+if [ -f $conf ]; then
+	RUNTIME=`awk -F "=" '/runtime_command/ {print $2}' $conf`
+	dir=`awk -F "=" '/wine_dir/ {print $2}' $conf`
+	default_prefix=`awk -F "=" '/default_prefix/ {print $2}' $conf`
+	wine_prefixes_dir=`awk -F "=" '/wine_prefixes_dir/ {print $2}' $conf`
+fi
 
 wine_ver_get=`ls $dir | sort --version-sort | sed '/wine/!d; $!d'` # get the lasted version of wine in dir, e.g. wine_1.8.0
-wine_path="/opt/"$wine_ver_get"/bin/"
-
-VER="1.5.1"
+wine_path=$dir$wine_ver_get"/bin/"
 
 function help() 
 {
@@ -25,7 +34,6 @@ function help()
        WINEPREFIX=/prefix/path			Use specific prefix
        WINEARCH=win32				Use wine 32bit prefix
        ARCH=win32				Use 32bit wine binaries
-       RUNTIME=none | local | steam		Use specific runtime (default -- local)
        WINEDLLOVERRIDES=[dlls]			Override dlls, e.g.:
 						'd3dx9=n,b;C:\user\d3dx9=b;...',
 						n -- native, b -- blutin
@@ -43,8 +51,10 @@ function yesno()
 	case $ans in
 		"no") rm /tmp/wine-staging.html; exit 0;;
 		"n") rm /tmp/wine-staging.html; exit 0;;
+		"N") rm /tmp/wine-staging.html; exit 0;;
 		"yes") getLastesWine;;
 		"y") getLastesWine;;
+		"Y") getLastesWine;;
 		*) echo "Put (y)es or (n)o!"; yesno;;
 	esac
 }
@@ -56,14 +66,13 @@ function checkWineVersion()
 	
 	v=$(cat /tmp/wine-staging.html | sed -e :a -e 's/<[^>]*>//g;/</N;//ba' | cut -f 1 -d ' ' | sed '/dev/d;/dbg/d;/winehq/d;/compat/d'\
  | grep `lsb_release --codename | cut -f 2` | tail -n 4 | sed '3!D' | sed -E 's/amd64//g;s/[^.0-9]//g' | rev | cut -c 2- | rev)
-	vv=$(ls /opt | grep wine | tail -n 1 | sed -E 's/amd64//g;s/[^.0-9]//g' | cut -f 1-10)
  
-	if [ $v = $vv ]; then
-		echo "You have lastes wine version"
+	if [ "wine_"$v = $wine_ver_get ]; then
+		echo "You have lastes wine version at this moment: $wine_ver_get"
 		rm /tmp/wine-staging.html
 		exit 0
 	else
-		echo "New version are avalable! Do you want to download it?"
+		echo -e "New version ($v) are avalable! Do you want to download it?\n[Y(es)/n(o)]:"
 		yesno
 	fi
 }
@@ -137,11 +146,16 @@ function getLastesWine()
 	
 	rm /tmp/wine-staging.html
 	
-	echo "All done! Now you wine version on 20% cooler!"
-
+	echo "All done! Your wine version now is $v."
 }
 
-if [ ! -z "$ARCH" ]; then
+if [ -z "$WINEPREFIX" ]; then
+	WINEPREFIX=$wine_prefixes_dir$default_prefix
+fi
+
+prefix=`awk -F "=" '/#arch/ {print $2}' $WINEPREFIX/user.reg`
+
+if [[ ! -z "$ARCH" || "$prefix" = "win32" ]]; then
 	ww="wine"
 	echo "msg: Use 32bit wine"
 else
@@ -166,30 +180,11 @@ elif [ "$1" = "--check-wine-version" ]; then
 	exit 0;
 fi
 
-if [[ `which runtime` = "runtime not found" || ! -f $rt ]]; then
-	echo "warn: No runtime found! Use no runtime, some 32x bit application(s) may work incorrectly if you don't have 32bit libraries in your system."
-	lrt=""
+if [ -z $RUNTIME ]; then
+	echo "msg: Use NO runtime. Remember, if you don't use multilib, some 32bit app may work incorrectly."
 else
-	case "$RUNTIME" in
-	"none")
-		lrt=""
-		echo "msg: Use NO runtime";;
-	"steam")
-		lrt=$rt
-		echo "msg: Use Steam runtime";;
-	"")
-		echo "msg: Use local runtime (by default)";;
-	"local")
-		echo "msg: Use local runtime (by default)";;
-	*)
-		echo "warn: I don't know this runtime. Use default runtime (local)"
-	esac
+	echo "msg: Use \"$RUNTIME\" command to provide runtime."
 fi
 
-if [ -z "$WINEPREFIX" ]; then
-	echo "msg: running wine verion $wine_ver_get"
-	WINEPREFIX="$HOME/.local/share/.wine" $lrt $wine_path$ww $1
-else
-	echo "msg: running wine verion $wine_ver_get"
-	$wine_path$ww $1
-fi
+echo "msg: running wine verion $wine_ver_get"
+WINEPREFIX=$WINEPREFIX $RUNTIME $wine_path$ww $1

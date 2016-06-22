@@ -1,15 +1,19 @@
-# wine script v1.5.1
+# wine script v1.6.0
 
 Just a little script, debian package and a zsh compiletion module for my personal use.
 
 ## Changes
-- Cleaning outdated code
-- Now script detected runtimes, and if not found it, just use none by default
-- Now you may change working directory needs by script (planning to add ini\conf)
-- Downloading the lastes wine-staging (working only for Debian users for now (Mint and Ubuntu have ppa for wine-staging), mb in next version I do it for other system)
+- Fix some bugs
+- Now script detect if prefix is 32bit
+- Now script read settings from conf file
+
+## Configure conf with file
+Configure file must be locate in $HOME/.config/wine_helper/settings.conf. In repo root directory is an example settings.conf. File well documented.
 
 ## TODO
-- Parse ini file (mb rewrite to python or other script language)
+- Shorter WINEPREFIX path usage
+- Optimize get new version code
+- Debian package (I'm lazy)
 
 ## Dependings
 - bash >= 4
