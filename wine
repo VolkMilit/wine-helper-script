@@ -162,7 +162,7 @@ fi
 for i in "$@"; do
 	case $i in
 		-wvs=*|--wine-ver-set=*)
-		wine_path=$dir"${i#*=}/bin/"
+		wine_path=$dir"wine_${i#*=}/bin/"
 		shift
 		;;
 		
@@ -182,8 +182,8 @@ for i in "$@"; do
 		;;
 		
 		*)		
-		help
-		exit 0
+		#help
+		#exit 0
 		;;
 esac
 done
