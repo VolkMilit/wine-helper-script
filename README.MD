@@ -1,4 +1,4 @@
-# wine script v1.6.0
+# wine script v1.6.1
 
 Just a little script, debian package and a zsh compiletion module for my personal use.
 
@@ -11,7 +11,6 @@ Just a little script, debian package and a zsh compiletion module for my persona
 Configure file must be locate in $HOME/.config/wine_helper/settings.conf. In repo root directory is an example settings.conf. File well documented.
 
 ## TODO
-- Shorter WINEPREFIX path usage
 - Optimize get new version code
 - Debian package (I'm lazy)
 

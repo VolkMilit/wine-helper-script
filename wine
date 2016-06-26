@@ -1,12 +1,12 @@
 #!/bin/bash
 conf=$HOME/.config/wine_helper/settings.conf
 
-VER="1.6.0"
+VER="1.6.1"
 
 RUNTIME="$HOME/.steam/runtime/run.sh"
 dir="/opt"
 default_prefix=".wine64"
-wine_prefixes_dir="$HOME/.local/share/wine_prefix/"$default_prefix
+wine_prefixes_dir="$HOME/.local/share/wine_prefix/"
 
 if [ -f $conf ]; then
 	RUNTIME=`awk -F "=" '/runtime_command/ {print $2}' $conf`
@@ -21,14 +21,17 @@ wine_path=$dir$wine_ver_get"/bin/"
 function help() 
 {
 	echo "Usage: wine PROGRAM [ARGUMENTS...]  		Run the specified program
-       wine --h			     		Display wine script help
-       wine --ver				Display wine script version
+       wine -h			     		Display wine script help
+       wine -v					Display wine script version
        wine --version				Display (lastes you have) wine version
        wine --help                   		Display wine help and exit
        wine --version               		Output version information and exit
        wine --patches               		Output patch information and exit
        wine --check-libs            		Checks if shared libs are installed
-       wine --new-prefix	     		New prefix
+       wine -np|--new-prefix	     		New prefix
+       wine -p|--prefix				Set wine prefix (if you have problems with this, use WINEPREFIX=* instead)
+       wine -a|--arch				Set wine arch (if you have problems with this, use ARCH=* instead)
+       wine -wvs|--wine-version-set		Set wine version to use
        wine --check-wine-version		Check if wine-starging need to be updated
        
        WINEPREFIX=/prefix/path			Use specific prefix
@@ -38,7 +41,6 @@ function help()
 						'd3dx9=n,b;C:\user\d3dx9=b;...',
 						n -- native, b -- blutin
        WINEDEBUG=[channels]			Use debug, e.g.: +all,-relay; warn+heap
-       WINE=[wine version]			Use specific wine version
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY (c) 2015 Volk_Milit"
@@ -149,6 +151,43 @@ function getLastesWine()
 	echo "All done! Your wine version now is $v."
 }
 
+if [ "$1" = "-v" ]; then
+	echo "WINE helper version is $VER"
+	exit 0
+elif [ "$1" = "--check-wine-version" ]; then
+	checkWineVersion
+	exit 0;
+fi
+
+for i in "$@"; do
+	case $i in
+		-wvs=*|--wine-ver-set=*)
+		wine_path=$dir"${i#*=}/bin/"
+		shift
+		;;
+		
+		-np|--new-prefix)
+		WINEPREFIX=$WINEPREFIX $wine_path$ww wineboot
+		shift
+		;;
+		
+		-p=*|--prefix=*)
+		WINEPREFIX=$wine_prefixes_dir"${i#*=}"
+		shift
+		;;
+		
+		-a=*|--arch=*)
+		ARCH="${i#*=}"
+		shift
+		;;
+		
+		*)		
+		help
+		exit 0
+		;;
+esac
+done
+
 if [ -z "$WINEPREFIX" ]; then
 	WINEPREFIX=$wine_prefixes_dir$default_prefix
 fi
@@ -163,28 +202,13 @@ else
 	echo "msg: Use 64bit wine (by default)"
 fi
 
-if [ "$1" = "" ]; then
-	help
-	exit 0
-elif [ "$1" = "--h" ]; then
-	help 
-	exit 0
-elif [ "$1" = "--ver" ]; then
-	echo "WINE helper version is $VER"
-	exit 0
-elif [[ "$1" = "--N" || "$1" = "--new-prefix" ]]; then
-	WINEPREFIX=$WINEPREFIX $wine_path$ww wineboot
-	exit 0
-elif [ "$1" = "--check-wine-version" ]; then
-	checkWineVersion
-	exit 0;
-fi
-
 if [ -z $RUNTIME ]; then
 	echo "msg: Use NO runtime. Remember, if you don't use multilib, some 32bit app may work incorrectly."
 else
 	echo "msg: Use \"$RUNTIME\" command to provide runtime."
 fi
 
-echo "msg: running wine verion $wine_ver_get"
+wine_ver=`echo $wine_path | sed 's/[\/_optwineb]//g'`
+
+echo "msg: running wine verion $wine_ver" 
 WINEPREFIX=$WINEPREFIX $RUNTIME $wine_path$ww $1
