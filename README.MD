@@ -1,11 +1,18 @@
-# wine script v1.6.1
+# wine script v1.6.2
 
 Just a little script, debian package and a zsh compiletion module for my personal use.
 
 ## Changes
-- Fix some bugs
-- Now script detect if prefix is 32bit
-- Now script read settings from conf file
+- Try to separate binary
+- Fix bugs
+
+## wine-update
+- Downloading and install lastes wine staging (Debian-based\Ubuntu-based\Mint-based only)
+- Downloading and install any version from POL (Not implemented yet)
+
+## wine-shortcut
+- Create shortcut with wine exec. Like:
+cp /folder_with_exe; wine -p=prefix exe
 
 ## Configure conf with file
 Configure file must be locate in $HOME/.config/wine_helper/settings.conf. In repo root directory is an example settings.conf. File well documented.
