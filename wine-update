@@ -106,9 +106,9 @@ function yesno()
 		"no") rm /tmp/wine-staging.html; exit 0;;
 		"n") rm /tmp/wine-staging.html; exit 0;;
 		"N") rm /tmp/wine-staging.html; exit 0;;
-		"yes") getLastesWine;;
-		"y") getLastesWine;;
-		"Y") getLastesWine;;
+		"yes") getStagingWine;;
+		"y") getStagingWine;;
+		"Y") getStagingWine;;
 		*) echo "Put (y)es or (n)o!"; yesno;;
 	esac
 }

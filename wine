@@ -34,6 +34,9 @@ function help()
        wine -wvs|--wine-version-set		Set wine version to use
        wine --check-wine-version		Check if wine-starging need to be updated
        wine --set-shortcut			Set shortcut
+       wine -k|--kill 				Try to kill wineserver
+       wine -wc|--use-write-copy-varible 	See https://github.com/wine-compholio/wine-staging/wiki/Environment-Variables
+       wine -sm|--use-shared-memory-varible 	See https://github.com/wine-compholio/wine-staging/wiki/Environment-Variables
        
        WINEPREFIX=/prefix/path			Use specific prefix
        WINEARCH=win32				Use wine 32bit prefix
@@ -83,6 +86,21 @@ for i in "$@"; do
 		shift
 		;;
 		
+		-k|--kill)
+		WINEPREFIX=$WINEPREFIX $wine_path$ww wineserver -k
+		shift
+		;;
+		
+		-wc|--use-write-copy-varible)
+		wc=1
+		shift
+		;;
+		
+		-sm|--use-shared-memory-varible)
+		sm=1
+		shift
+		;;
+		
 		*)		
 		#help
 		#exit 0
@@ -90,9 +108,9 @@ for i in "$@"; do
 esac
 done
 
-if [ -z "$WINEPREFIX" ]; then
-	WINEPREFIX=$wine_prefixes_dir$default_prefix
-fi
+if [ -z "$WINEPREFIX" ]; then WINEPREFIX=$wine_prefixes_dir$default_prefix; fi
+if [ -z $wc ]; then $wc = 0; fi
+if [ -z $sm ]; then $sm = 0; fi
 
 prefix=`awk -F "=" '/#arch/ {print $2}' $WINEPREFIX/user.reg`
 
@@ -113,4 +131,4 @@ fi
 wine_ver=`echo $wine_path | sed 's/[\/_optwineb]//g'`
 
 echo "msg: running wine verion $wine_ver" 
-WINEPREFIX=$WINEPREFIX $RUNTIME $wine_path$ww $1
+STAGING_WRITECOPY=$wc STAGING_SHARED_MEMORY=$sm WINEPREFIX=$WINEPREFIX $RUNTIME $wine_path$ww $1
