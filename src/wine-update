@@ -1,0 +1,130 @@
+#!/bin/bash
+
+dir=/opt
+wine_ver_get=`ls $dir | sort --version-sort | sed '/wine_/!d; $!d'` # get the lasted version of wine in dir, e.g. wine_1.8.0
+wine_path=$dir$wine_ver_get"/bin/"
+
+function getPOLLists()
+{
+		LIST="https://www.playonlinux.com/wine/binaries/linux-"$1".lst"
+		curl $LIST | sed 's/.pol;[^ ]*//' > /tmp/list-$1.lst
+		cat /tmp/list-$1.lst
+		rm /tmp/list-$1.lst
+}
+
+# https://www.playonlinux.com/wine/binaries/
+# both 32x and 64x
+function getPOLWine()
+{
+		GET="https://www.playonlinux.com/wine/binaries/linux-"$1"/"$2".pol"
+		wget -qO - $GET > /tmp/wine.tar.gz
+		cd /tmp
+		tar xvf wine.tar.gz
+		rm -rf playonlinux
+		rm -rf files
+		ver=`ls wineversion`
+		mv wineversion/* /opt/wine_$ver
+}
+
+# http://cdn.fds-team.de/stable/debian/pool/main/w/wine-staging
+function getStagingWine()
+{	
+	echo "================================"
+	echo "Downloading lastes wine-staging"
+	echo "================================"
+	echo -e "\n"
+	echo "Downloading and parsing page..."
+	
+	# remove all html tegs, remove all dbg and dev versions, get Debian codename
+	# P.S. sorry for this duck tape :/ I'm too lazy, fix later, mb
+	wineVersionAmd64=$(cat /tmp/wine-staging.html | sed -e :a -e 's/<[^>]*>//g;/</N;//ba' | cut -f 1 -d ' ' | sed '/dev/d;/dbg/d;/winehq/d;/compat/d'\
+	 | grep `lsb_release --codename | cut -f 2` | tail -n 4 | sed '3!D')
+	wineVersionAmd64Libs=$(cat /tmp/wine-staging.html | sed -e :a -e 's/<[^>]*>//g;/</N;//ba' | cut -f 1 -d ' ' | sed '/dev/d;/dbg/d;/winehq/d;/compat/d'\
+	 | grep `lsb_release --codename | cut -f 2` | tail -n 4 | sed '1!D')
+	wineVersioni386=$(cat /tmp/wine-staging.html | sed -e :a -e 's/<[^>]*>//g;/</N;//ba' | cut -f 1 -d ' ' | sed '/dev/d;/dbg/d;/winehq/d;/compat/d'\
+	 | grep `lsb_release --codename | cut -f 2` | tail -n 4 | sed '4!D')
+	wineVersioni386Libs=$(cat /tmp/wine-staging.html | sed -e :a -e 's/<[^>]*>//g;/</N;//ba' | cut -f 1 -d ' ' | sed '/dev/d;/dbg/d;/winehq/d;/compat/d'\
+	 | grep `lsb_release --codename | cut -f 2` | tail -n 4 | sed '2!D')
+	
+	echo -e "Done!\nDonwloading and unpaking wine..."
+	
+	dir="/tmp/wine-staging/"
+	
+	mkdir $dir
+	
+	if [[ ! -z `lsb_release | grep amd64` ]]; then
+		echo "Script detected, that your system is amd64, so downloading 64bit wine."
+		echo "Downloading wine..."
+		# getting wine itself
+		touch $dir$wineVersionAmd64
+		wget -qO - http://cdn.fds-team.de/stable/debian/pool/main/w/wine-staging/$wineVersionAmd64 > $dir$wineVersionAmd64
+		dpkg -x $dir$wineVersionAmd64 $dir
+		rm $dir$wineVersionAmd64
+		
+		echo "Downloading libs..."
+		# getting libs both 32x and 64x
+		touch $dir$wineVersionAmd64Libs
+		wget -qO - http://cdn.fds-team.de/stable/debian/pool/main/w/wine-staging/$wineVersioni386Libs > $dir$wineVersionAmd64Libs
+		dpkg -x $dir$wineVersionAmd64Libs $dir
+		rm $dir$wineVersionAmd64Libs
+		
+		touch $dir$wineVersioni386Libs
+		wget -qO - http://cdn.fds-team.de/stable/debian/pool/main/w/wine-staging/$wineVersionAmd64Libs > $dir$wineVersioni386Libs
+		dpkg -x $dir$wineVersioni386Libs $dir
+		rm $dir$wineVersioni386Libs
+	else
+		echo "Script detected, that your system is i386, so downloading 32bit wine."
+		echo "Downloading wine..."
+		touch $dir$wineVersioni386
+		wget -qO - http://cdn.fds-team.de/stable/debian/pool/main/w/wine-staging/$wineVersioni386 > $dir$wineVersioni386
+		dpkg -x $dir$wineVersioni386 $dir
+		rm $dir$wineVersioni386
+		
+		echo "Downloading libs..."
+		touch $dir$wineVersioni386Libs
+		wget -qO - http://cdn.fds-team.de/stable/debian/pool/main/w/wine-staging/$wineVersioni386Libs > $dir$wineVersioni386Libs
+		dpkg -x $dir$wineVersioni386Libs $dir
+		rm $dir$wineVersioni386Libs
+	fi
+	
+	echo "Removing temporary data..."
+	echo "Now script ask for su password (using sudo):"
+	sleep 2
+	sudo mv $dir"/opt/wine-staging" "/opt/wine_"$v
+	
+	rm -rf "/tmp/wine-staging"
+	
+	rm /tmp/wine-staging.html
+	
+	echo "All done! Your wine version now is $v."
+}
+
+function yesno()
+{
+	read ans
+		
+	case $ans in
+		"no") rm /tmp/wine-staging.html; exit 0;;
+		"n") rm /tmp/wine-staging.html; exit 0;;
+		"N") rm /tmp/wine-staging.html; exit 0;;
+		"yes") getStagingWine;;
+		"y") getStagingWine;;
+		"Y") getStagingWine;;
+		*) echo "Put (y)es or (n)o!"; yesno;;
+	esac
+}
+
+# get wine-staging page
+wget -qO - http://cdn.fds-team.de/stable/debian/pool/main/w/wine-staging/ > /tmp/wine-staging.html
+	
+v=$(cat /tmp/wine-staging.html | sed -e :a -e 's/<[^>]*>//g;/</N;//ba' | cut -f 1 -d ' ' | sed '/dev/d;/dbg/d;/winehq/d;/compat/d'\
+ | grep `lsb_release --codename | cut -f 2` | tail -n 4 | sed '3!D' | sed -E 's/amd64//g;s/[^.0-9]//g' | rev | cut -c 2- | rev)
+ 
+if [[ "wine_"$v = $wine_ver_get ]]; then
+	echo "You have lastes wine staging version at this moment: $wine_ver_get"
+	rm /tmp/wine-staging.html
+	exit 0
+else
+	echo -e "New version ($v) are avalable! Do you want to download it?\n[Y(es)/n(o)]:"
+	yesno
+fi
