@@ -1,4 +1,4 @@
-# wine script v1.6.2
+# wine script v1.7.0
 
 Just a little script, debian package and a zsh compiletion module for my personal use.
 
@@ -19,12 +19,12 @@ Configure file must be locate in $HOME/.config/wine_helper/settings.conf. In rep
 
 ## TODO
 - Optimize get new version code
-- Debian package (I'm lazy)
 
 ## Dependings
 - bash >= 4
 - wget >= 1.xx
 - sed >= 4.x.x
+- (g)awk >= 4.x
 
 ## License
 Apache License, Version 2.0
