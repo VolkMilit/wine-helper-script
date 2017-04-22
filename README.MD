@@ -1,4 +1,4 @@
-# wine script v1.7.0
+# wine script v1.8.0
 
 Just a little script, debian package and a zsh compiletion module for my personal use.
 
@@ -12,13 +12,14 @@ Just a little script, debian package and a zsh compiletion module for my persona
 
 ## wine-shortcut
 - Create shortcut with wine exec. Like:
-cp /folder_with_exe; wine -p=prefix exe
+cd /folder_with_exe; wine -p=prefix exe
 
 ## Configure conf with file
 Configure file must be locate in $HOME/.config/wine_helper/settings.conf. In repo root directory is an example settings.conf. File well documented.
 
 ## TODO
-- Optimize get new version code
+~~- Optimize get new version code
+- Rewrite this to lua :D
 
 ## Dependings
 - bash >= 4

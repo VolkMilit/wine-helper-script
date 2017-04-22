@@ -4,7 +4,7 @@ mkdir -p deb/usr/local/bin
 mkdir -p deb/DEBIAN
 cat > deb/DEBIAN/control << EOF
 Package: wine-scripts
-Version: 1.7.0
+Version: 1.8.0
 Section: games
 Architecture: all
 Priority: optional
@@ -22,4 +22,4 @@ md5sum $(find ./ -type f | awk '!/^\.\/DEBIAN/ { print substr($0, 3) }') > DEBIA
 cd ..
 fakeroot dpkg-deb --build deb
 lintian deb.deb
-mv deb.deb wine-scripts-1.7.0_amd64.deb
+mv deb.deb wine-scripts-1.8.0_amd64.deb

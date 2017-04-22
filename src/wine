@@ -1,7 +1,7 @@
 #!/bin/bash
 conf=$HOME/.config/wine_helper/settings.conf
 
-VER="1.7.0"
+VER="1.8.0"
 
 RUNTIME="$HOME/.steam/runtime/run.sh"
 dir="/opt"
@@ -20,23 +20,25 @@ wine_path=$dir$wine_ver_get"/bin/"
 
 function help() 
 {
-	echo "Usage: wine PROGRAM [ARGUMENTS...]
-       wine -h			     		Display wine script help
-       wine -v					Display wine script version
-       wine --version				Display (lastes you have) wine version
-       wine --help                   		Display wine help and exit
-       wine --version               		Output version information and exit
-       wine --patches               		Output patch information and exit
-       wine --check-libs            		Checks if shared libs are installed
-       wine -np|--new-prefix	     		Create new prefix
-       wine -p|--prefix				Set wine prefix (if you have problems with this, use WINEPREFIX=* instead)
-       wine -a|--arch				Set wine arch (if you have problems with this, use ARCH=* instead)
-       wine -wvs|--wine-version-set		Set wine version to use
-       wine --check-wine-version		Check if wine-starging need to be updated
-       wine --set-shortcut			Set shortcut
-       wine -k|--kill 				Try to kill wineserver
-       wine -wc|--use-write-copy-varible 	See https://github.com/wine-compholio/wine-staging/wiki/Environment-Variables
-       wine -sm|--use-shared-memory-varible 	See https://github.com/wine-compholio/wine-staging/wiki/Environment-Variables
+	local wine=`basename $0`
+	echo "$wine-scripts $VER
+		Usage: $wine PROGRAM [ARGUMENTS...]
+       $wine -h			     		Display wine script help
+       $wine -v					Display wine script version
+       $wine --version				Display (lastes you have) wine version
+       $wine --help                   		Display wine help and exit
+       $wine --version               		Output version information and exit
+       $wine --patches               		Output patch information and exit
+       $wine --check-libs            		Checks if shared libs are installed
+       $wine -np|--new-prefix	     		Create new prefix
+       $wine -p|--prefix				Set wine prefix (if you have problems with this, use WINEPREFIX=* instead)
+       $wine -a|--arch				Set wine arch (if you have problems with this, use ARCH=* instead)
+       $wine -wvs|--wine-version-set		Set wine version to use
+       $wine --check-wine-version		Check if wine-starging need to be updated
+       $wine --set-shortcut			Set shortcut
+       $wine -k|--kill 				Try to kill wineserver
+       $wine -wc|--use-write-copy-varible 	See https://github.com/wine-compholio/wine-staging/wiki/Environment-Variables
+       $wine -sm|--use-shared-memory-varible 	See https://github.com/wine-compholio/wine-staging/wiki/Environment-Variables
        
        WINEPREFIX=/prefix/path			Use specific prefix
        WINEARCH=win32				Use wine 32bit prefix
