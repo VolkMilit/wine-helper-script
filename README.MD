@@ -26,6 +26,7 @@ Configure file must be locate in $HOME/.config/wine_helper/settings.conf. In rep
 - wget >= 1.xx
 - sed >= 4.x.x
 - (g)awk >= 4.x
+- html2text (any)
 
 ## License
 Apache License, Version 2.0
