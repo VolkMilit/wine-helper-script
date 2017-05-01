@@ -3,6 +3,7 @@ conf=$HOME/.config/wine_helper/settings.conf
 
 repo="https://dl.winehq.org/wine-builds/debian/pool/main/"
 dir=/opt
+release=$(lsb_release -cs)
 
 if [ -f $conf ]; then
 	dir=`awk -F "=" '/wine_dir/ {print $2}' $conf`
@@ -41,9 +42,6 @@ function getStagingWine()
 		exit 0
 	fi
 	
-	# get wine-staging page
-	wget -qO - $repo > /tmp/wine-staging.html
-	
 	echo "================================"
 	echo "Downloading lastes wine-staging"
 	echo "================================"
@@ -54,12 +52,12 @@ function getStagingWine()
 	# P.S. sorry for this duck tape :/ I'm too lazy, fix later, mb
 	
 	#black magic starts here
-	removeTrash=`cat /tmp/wine-staging.html | sed -e :a -e 's/<[^>]*>//g;/</N;//ba;/dbg/d;/compat/d;/devel/d;/dev/d;/winehq/d' | grep $development".0"~$(lsb_release --codename | sed 's/Codename:\t//g') | cut -d 'b' -f 1 | sed 's/de/deb/g'`
+	removeTrash=`html2text -nobs /tmp/wine-staging.html | sed '/wine-staging/!d;/'$release'/!d;/dbg/d;/dev/d;/compat/d' | grep $development | cut -d " " -f 8`
 	
-	wineVersionAmd64=$(echo $removeTrash | cut -d ' ' -f3)
-	wineVersionAmd64Libs=$(echo $removeTrash | cut -d ' ' -f1)
-	wineVersioni386=$(echo $removeTrash | cut -d ' ' -f4)
-	wineVersioni386Libs=$(echo $removeTrash | cut -d ' ' -f2)
+	wineVersionAmd64=$(echo $removeTrash | sed '3!D')
+	wineVersionAmd64Libs=$(echo $removeTrash | sed '1!D')
+	wineVersioni386=$(echo $removeTrash | sed '4!D')
+	wineVersioni386Libs=$(echo $removeTrash | sed '2!D')
 	
 	echo -e "Done!\nDonwloading and unpaking wine..."
 	
@@ -68,24 +66,25 @@ function getStagingWine()
 	
 	if [ `uname -m` == "x86_64" ]; then
 		echo "Script detected, that your system is amd64, so downloading 64bit wine."
-		echo "Downloading wine..."
+		echo "Downloading and extracting wine..."
 		# getting wine itself
 		touch $tmp_dir$wineVersionAmd64
 		wget -qO - $repo$wineVersionAmd64 > $tmp_dir$wineVersionAmd64
 		dpkg -x $tmp_dir$wineVersionAmd64 $tmp_dir
 		#rm $dir$wineVersionAmd64
 		
-		echo "Downloading libs..."
-		# getting libs both 32x and 64x
+		echo "Downloading and extracting libs..."	
 		touch $tmp_dir$wineVersionAmd64Libs
-		wget -qO - $repo$wineVersioni386Libs > $tmp_dir$wineVersionAmd64Libs
-		dpkg -x $tmp_dir$wineVersionAmd64Libs $tmp_dir
-		#rm $dir$wineVersionAmd64Libs
-		
 		touch $tmp_dir$wineVersioni386Libs
+		
+		wget -qO - $repo$wineVersioni386Libs > $tmp_dir$wineVersionAmd64Libs
 		wget -qO - $repo$wineVersionAmd64Libs > $tmp_dir$wineVersioni386Libs
+		
+		dpkg -x $tmp_dir$wineVersionAmd64Libs $tmp_dir
 		dpkg -x $tmp_dir$wineVersioni386Libs $tmp_dir
-		#rm $dir$wineVersioni386Libs
+		
+		rm $dir$wineVersionAmd64Libs
+		rm $dir$wineVersioni386Libs
 	else
 		echo "Script detected, that your system is i386, so downloading 32bit wine."
 		echo "Downloading wine..."
@@ -107,8 +106,6 @@ function getStagingWine()
 	sudo mv $tmp_dir"opt/wine-staging" "/opt/wine_"$development
 	
 	rm -rf "/tmp/wine-staging"
-	rm /tmp/wine-staging.html
-	
 	echo "All done! Your wine version now is $v."
 }
 
@@ -127,18 +124,11 @@ function yesno()
 	esac
 }
 
-function getWineVersions()
-{
-	# get wine-hq page to get current wine versions
-	wget -qO - https://www.winehq.org/ > /tmp/wine-hq.html
-	removeTrash=`cat /tmp/wine-hq.html | grep "Wine&nbsp;" | sed -e :a -e 's/<[^>]*>//g;/</N;//ba;s/Wine&nbsp;//g;s/ //g'`
-	development=`echo $removeTrash | cut -d ' ' -f2`
-	rm /tmp/wine-hq.html
-}
-
-getWineVersions
+# get wine-hq page to get current wine versions
+wget -qO - $repo > /tmp/wine-staging.html
+development=`html2text -nobs /tmp/wine-staging.html | sed '/wine-staging/!d;/'$release'/!d;/dbg/d;/dev/d;/compat/d' | tail -1 | cut -d " " -f8 | cut -d "_" -f2 | tr -d '~'$release`
  
-if [[ "wine_"$development = $wine_ver_get ]]; then
+if [[ "wine_"$development = $wine_ver_get".0" ]]; then
 	echo "You have lastes wine staging version at this moment: $wine_ver_get"
 	rm /tmp/wine-staging.html
 	exit 0
@@ -146,3 +136,5 @@ else
 	echo -e "New version ($development.0) are avalable! Do you want to download it?\n[Y(es)/n(o)]:"
 	yesno
 fi
+
+rm /tmp/wine-staging.html
