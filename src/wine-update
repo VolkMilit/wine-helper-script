@@ -48,16 +48,13 @@ function getStagingWine()
 	echo -e "\n"
 	echo "Downloading and parsing page..."
 	
-	# remove all html tegs, remove all dbg and dev versions, get Debian codename
-	# P.S. sorry for this duck tape :/ I'm too lazy, fix later, mb
-	
 	#black magic starts here
 	removeTrash=`html2text -nobs /tmp/wine-staging.html | sed '/wine-staging/!d;/'$release'/!d;/dbg/d;/dev/d;/compat/d' | grep $development | cut -d " " -f 8`
 	
-	wineVersionAmd64=$(echo $removeTrash | sed '3!D')
-	wineVersionAmd64Libs=$(echo $removeTrash | sed '1!D')
-	wineVersioni386=$(echo $removeTrash | sed '4!D')
-	wineVersioni386Libs=$(echo $removeTrash | sed '2!D')
+	wineVersionAmd64=$(echo $removeTrash | cut -d " " -f 3)
+	wineVersionAmd64Libs=$(echo $removeTrash | cut -d " " -f 1)
+	wineVersioni386=$(echo $removeTrash | cut -d " " -f 4)
+	wineVersioni386Libs=$(echo $removeTrash | cut -d " " -f 2)
 	
 	echo -e "Done!\nDonwloading and unpaking wine..."
 	
@@ -71,7 +68,6 @@ function getStagingWine()
 		touch $tmp_dir$wineVersionAmd64
 		wget -qO - $repo$wineVersionAmd64 > $tmp_dir$wineVersionAmd64
 		dpkg -x $tmp_dir$wineVersionAmd64 $tmp_dir
-		#rm $dir$wineVersionAmd64
 		
 		echo "Downloading and extracting libs..."	
 		touch $tmp_dir$wineVersionAmd64Libs
@@ -82,22 +78,17 @@ function getStagingWine()
 		
 		dpkg -x $tmp_dir$wineVersionAmd64Libs $tmp_dir
 		dpkg -x $tmp_dir$wineVersioni386Libs $tmp_dir
-		
-		rm $dir$wineVersionAmd64Libs
-		rm $dir$wineVersioni386Libs
 	else
 		echo "Script detected, that your system is i386, so downloading 32bit wine."
 		echo "Downloading wine..."
 		touch $tmp_dir$wineVersioni386
 		wget -qO - $repo$wineVersioni386 > $tmp_dir$wineVersioni386
 		dpkg -x $dir$wineVersioni386 $tmp_dir
-		rm $tmp_dir$wineVersioni386
 		
 		echo "Downloading libs..."
 		touch $tmp_dir$wineVersioni386Libs
 		wget -qO - $repo$wineVersioni386Libs > $tmp_dir$wineVersioni386Libs
 		dpkg -x $tmp_dir$wineVersioni386Libs $tmp_dir
-		rm $tmp_dir$wineVersioni386Libs
 	fi
 	
 	echo "Removing temporary data..."
