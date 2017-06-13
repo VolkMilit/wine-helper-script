@@ -11,8 +11,8 @@ wine_prefixes_dir="$HOME/.local/share/wine_prefix/"
 
 if [ -f $conf ]; then source $conf; fi
 
-#wine_ver_get=`ls $dir | sort --version-sort | sed '/wine/!d; $!d'` # get the lasted version of wine in dir, e.g. wine_1.8.0
-wine_ver_get=`ls -d1 /opt/wine*`
+wine_ver_get=`ls $dir | sort --version-sort | sed '/wine/!d;s/wine_//g;$!d'` # get the lasted version of wine in dir, e.g. wine_1.8.0
+#wine_ver_get=`ls -d1 /opt/wine*`
 wine_path=$dir$wine_ver_get"/bin/"
 
 function help() 
