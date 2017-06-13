@@ -2,7 +2,7 @@
 conf=$HOME/.config/wine_helper/settings.conf
 
 repo="https://dl.winehq.org/wine-builds/debian/pool/main/"
-dir=/opt
+dir="/opt/"
 release=$(lsb_release -cs)
 
 if [ -f $conf ]; then
