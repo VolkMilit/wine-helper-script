@@ -1,52 +1,27 @@
-#!/bin/bash
-conf=$HOME/.config/wine_helper/settings.conf
+#!/usr/bin/env bash
 
-VER="1.8.0"
+conf=$HOME/.config/wine_helper/settings.conf
+VER="1.9.0"
 
 RUNTIME="$HOME/.steam/runtime/run.sh"
+RESOLUTION="$(xrandr -q | awk -F'current' -F',' 'NR==1 {gsub("( |current)","");print $2}')" # some fun staff of Kron
 dir="/opt"
 default_prefix=".wine64"
 wine_prefixes_dir="$HOME/.local/share/wine_prefix/"
 
-if [ -f $conf ]; then
-	RUNTIME=`awk -F "=" '/runtime_command/ {print $2}' $conf`
-	dir=`awk -F "=" '/wine_dir/ {print $2}' $conf`
-	default_prefix=`awk -F "=" '/default_prefix/ {print $2}' $conf`
-	wine_prefixes_dir=`awk -F "=" '/wine_prefixes_dir/ {print $2}' $conf`
-fi
+if [ -f $conf ]; then source $conf; fi
 
-wine_ver_get=`ls $dir | sort --version-sort | sed '/wine/!d; $!d'` # get the lasted version of wine in dir, e.g. wine_1.8.0
+#wine_ver_get=`ls $dir | sort --version-sort | sed '/wine/!d; $!d'` # get the lasted version of wine in dir, e.g. wine_1.8.0
+wine_ver_get=`ls -d1 /opt/wine*`
 wine_path=$dir$wine_ver_get"/bin/"
 
 function help() 
 {
 	local wine=`basename $0`
-	echo "$wine-scripts $VER
-		Usage: $wine PROGRAM [ARGUMENTS...]
-       $wine -h			     		Display wine script help
-       $wine -v					Display wine script version
-       $wine --version				Display (lastes you have) wine version
-       $wine --help                   		Display wine help and exit
-       $wine --version               		Output version information and exit
-       $wine --patches               		Output patch information and exit
-       $wine --check-libs            		Checks if shared libs are installed
-       $wine -np|--new-prefix	     		Create new prefix
-       $wine -p|--prefix				Set wine prefix (if you have problems with this, use WINEPREFIX=* instead)
-       $wine -a|--arch				Set wine arch (if you have problems with this, use ARCH=* instead)
-       $wine -wvs|--wine-version-set		Set wine version to use
-       $wine --check-wine-version		Check if wine-starging need to be updated
-       $wine --set-shortcut			Set shortcut
-       $wine -k|--kill 				Try to kill wineserver
-       $wine -wc|--use-write-copy-varible 	See https://github.com/wine-compholio/wine-staging/wiki/Environment-Variables
-       $wine -sm|--use-shared-memory-varible 	See https://github.com/wine-compholio/wine-staging/wiki/Environment-Variables
-       
-       WINEPREFIX=/prefix/path			Use specific prefix
-       WINEARCH=win32				Use wine 32bit prefix
-       ARCH=win32				Use 32bit wine binaries
-       WINEDLLOVERRIDES=[dlls]			Override dlls, e.g.:
-						'd3dx9=n,b;C:\user\d3dx9=b;...',
-						n -- native, b -- blutin
-       WINEDEBUG=[channels]			Use debug, e.g.: +all,-relay; warn+heap
+	echo -e "$wine-scripts $VER
+Usage: $wine [ARGUMENTS...] PROGRAM [PROGRAM ARGUMENTS...]
+
+$(column -tx -s'%' /usr/local/share/wine_helper/help)
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY (c) 2015-`date +'%Y'` Volk_Milit"
@@ -120,26 +95,23 @@ for i in "$@"; do
 done
 
 if [ -z "$WINEPREFIX" ]; then WINEPREFIX=$wine_prefixes_dir$default_prefix; fi
-if [ -z $wc ]; then wc=0; fi
 if [ -z $sm ]; then sm=0; fi
 
 prefix=`awk -F "=" '/#arch/ {print $2}' $WINEPREFIX/user.reg`
 
 if [[ ! -z "$ARCH" || "$prefix" = "win32" ]]; then
 	ww="wine"
-	echo "msg: Use 32bit wine"
+	echo "Use 32-bit wine binary"
 else
 	ww="wine64"
-	echo "msg: Use 64bit wine (by default)"
+	echo "Use 64-bit wine binary"
 fi
 
-if [ -z $RUNTIME ]; then
-	echo "msg: Use NO runtime."
-else
-	echo "msg: Use \"$RUNTIME\" command to provide runtime."
-fi
+if [ ! -z $RUNTIME ]; then echo "Use \"$RUNTIME\" command to provide runtime"; fi
 
 wine_ver=`echo $wine_path | sed 's/[\/_optwineb]//g'`
 
-echo "msg: running wine verion $wine_ver" 
-STAGING_WRITECOPY=$wc STAGING_SHARED_MEMORY=$sm WINEPREFIX=$WINEPREFIX $RUNTIME $wine_path$ww $1
+echo "Running wine verion $wine_ver" 
+STAGING_SHARED_MEMORY=$sm WINEPREFIX=$WINEPREFIX $RUNTIME $wine_path$ww $1 \
+&& CURRENT_RESOLUTION="$(xrandr -q | awk -F'current' -F',' 'NR==1 {gsub("( |current)","");print $2}')" \
+&& if [ "$CURRENT_RESOLUTION" != "$RESOLUTION" ]; then  xrandr -s $RESOLUTION; fi

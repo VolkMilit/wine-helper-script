@@ -1,0 +1,27 @@
+-h%Display this help and exit
+-v%Display wine script version
+--version%Display (lastes you have) wine version
+--help%Display wine help and exit
+--version%Output version information and exit
+--patches%Output patch information and exit
+--check-libs%Checks if shared libs are installed
+--new-prefix|-np%Create new prefix
+--prefix|-p%Set wine prefix (similar to \$WINEPREFIX)
+--arch|-a%Set wine arch (similar to \$ARCH)
+--wine-version-set|-wvs%Set wine version to use
+--check-wine-version%Check if wine-starging need to be updated (similar to wine-update)
+--set-shortcut%Set local desktop file for specific exe
+--kill|-k%Try to kill wineserver
+--use-shared-memory-varible|-sm%Wine Staging can optimize some wineserver calls by using shared memory
+--delete-junk-associations%Delete junk associations with files in current WINE prefix
+%
+Some WINE default varibles:
+%
+WINEPREFIX=/prefix/path%Use specific prefix
+WINEARCH=win32%Use wine 32bit prefix
+ARCH=win32%Use 32bit wine binaries
+WINEDLLOVERRIDES=[dlls]%Override dlls, e.g.:
+'d3dx9=n,b;C:\user\d3dx9=b;...',
+n -- native, b -- blutin
+%
+WINEDEBUG=[channels]%Use debug, e.g.: +all,-relay; warn+heap

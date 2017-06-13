@@ -1,10 +1,12 @@
-# wine script v1.8.0
+# wine script v1.9.0
 
 Just a little script, debian package and a zsh compiletion module for my personal use.
 
 ## Changes
-- Try to separate binary
 - Fix bugs
+- Implement resolution change, if game overwrite it
+- Fix wine-update code
+- Separate help from binary
 
 ## wine-update
 - Downloading and install lastes wine staging (Debian-based\Ubuntu-based\Mint-based only)
