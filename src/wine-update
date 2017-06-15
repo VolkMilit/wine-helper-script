@@ -133,7 +133,7 @@ if [[ $development = $wine_ver_get ]]; then
 	exit 0
 else
 	#echo -e "New version ($development.0) are avalable! Do you want to download it?\n[Y(es)/n(o)]:"
-	if ask 'New version ($development) are avalable! Do you want to download it?'; then
+	if ask 'New version ('$development') are avalable! Do you want to download it?'; then
 		getStagingWine
 	fi
 fi
