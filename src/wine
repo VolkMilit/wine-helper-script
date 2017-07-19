@@ -3,7 +3,7 @@
 conf=$HOME/.config/wine_helper/settings.conf
 VER="1.9.0"
 
-RUNTIME="$HOME/.steam/runtime/run.sh"
+runtime="$HOME/.steam/runtime/run.sh"
 RESOLUTION="$(xrandr -q | awk -F'current' -F',' 'NR==1 {gsub("( |current)","");print $2}')" # some fun staff of Kron
 dir="/opt/"
 default_prefix=".wine64"
@@ -107,7 +107,7 @@ else
 	echo "Use 64-bit wine binary"
 fi
 
-if [ ! -z $RUNTIME ]; then echo "Use \"$RUNTIME\" command to provide runtime"; fi
+if [ -z $NORUNTIME ]; then RUNTIME=$runtime; echo "Use \"$RUNTIME\" command to provide runtime"; fi
 
 wine_ver=`echo $wine_path | sed 's/[\/_optwineb]//g'`
 

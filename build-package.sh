@@ -8,6 +8,9 @@ Package: wine-scripts
 Version: 1.9.0
 Section: games
 Architecture: all
+Installed-Size: 19.8K
+Depends: bash | sh | dash, awk, wget, lsb-release
+Recommended: wine | wine-staging
 Priority: optional
 Maintainer: Volk_Milit <javirrdar@gmail.com>
 Description: WINE is not emulator helper scripts for easy using multiply wine installations in any place you like.

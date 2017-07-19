@@ -17,8 +17,25 @@ This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY (c) 2015 Volk_Milit"
 }
 
+#https://notabug.org/kl3/scripts/src/master/build
+function ask()
+{
+	echo -e "${1} [yN]: " 1>&2
+	read REPLY
+	[ "${REPLY}" = y ]
+}
+
 if [[ "$1" = "-a" || "$1" = "--auto" ]]; then
-	exe=$2
+	ind=0
+	exe_list=$(ls -l | egrep "*-*-x" | cut -d " " -f 11)
+	
+	if [ -z $2 ]; then
+		ask "You did't specify exe path. Choose one of these:\n"
+		for i in $F; do echo $((ind=ind+1)) $i; done
+	else
+		exe=$2
+	fi
+	
 	tmp=`echo $pwd/$2 | sed 's|.*/||'`
 	name=`basename "$(echo $pwd/$tmp | sed 's/\/'$tmp'//g;s/"//g')"`
 	prefix=.wine_tesv

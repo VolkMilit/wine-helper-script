@@ -17,6 +17,7 @@
 %
 Some WINE default varibles:
 %
+NORUNTIME=[any value]%Don't use runtime at all
 WINEPREFIX=/prefix/path%Use specific prefix
 WINEARCH=win32%Use wine 32bit prefix
 ARCH=win32%Use 32bit wine binaries
