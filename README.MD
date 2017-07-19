@@ -24,8 +24,9 @@ Configure file must be locate in $HOME/.config/wine_helper/settings.conf. In rep
 - Rewrite this to lua :D
 
 ## Dependings
-- bash >= 4
+- bash >= 4 | sh | dash
 - wget >= 1.xx
+- curl (any)
 - sed >= 4.x.x
 - (g)awk >= 4.x
 - html2text (any)
