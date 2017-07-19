@@ -9,7 +9,7 @@ Version: 1.9.0
 Section: games
 Architecture: all
 Installed-Size: 19.8K
-Depends: bash | sh | dash, awk, wget, lsb-release
+Depends: bash | sh | dash, awk, wget, lsb-release, html2text
 Recommended: wine | wine-staging
 Priority: optional
 Maintainer: Volk_Milit <javirrdar@gmail.com>
