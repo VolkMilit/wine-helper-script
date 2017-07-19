@@ -1,0 +1,141 @@
+#!/usr/bin/env bash
+conf=$HOME/.config/wine_helper/settings.conf
+
+repo="https://dl.winehq.org/wine-builds/debian/pool/main/"
+dir="/opt/"
+release=$(lsb_release -cs)
+
+if [ -f $conf ]; then
+	source $conf
+fi
+
+wine_ver_get=$(ls $dir | sort --version-sort | sed '/wine_/!d;s/wine_//g;$!d') # get the lasted version of wine in dir, e.g. wine_1.8.0
+wine_path=$dir$wine_ver_get"/bin/"
+
+function getPOLLists()
+{
+		LIST="https://www.playonlinux.com/wine/binaries/linux-"$1".lst"
+		curl $LIST | sed 's/.pol;[^ ]*//' > /tmp/list-$1.lst
+		cat /tmp/list-$1.lst
+		rm /tmp/list-$1.lst
+}
+
+# https://www.playonlinux.com/wine/binaries/
+# both 32x and 64x
+function getPOLWine()
+{
+		GET="https://www.playonlinux.com/wine/binaries/linux-"$1"/"$2".pol"
+		wget -qO - $GET > /tmp/wine.tar.gz
+		cd /tmp
+		tar xvf wine.tar.gz
+		rm -rf playonlinux
+		rm -rf files
+		ver=`ls wineversion`
+		mv wineversion/* /opt/wine_$ver
+}
+
+# https://dl.winehq.org/wine-builds/debian/pool/main/
+function getStagingWine()
+{
+	if [[ ! `which sudo` && `ls -ld $dir | cut -d ' ' -f3`!=whoami ]]; then
+		echo "You don't have sudo installed in your system. Run $0 as root or change destanation folder."
+		exit 0
+	fi
+	
+	echo "================================"
+	echo "Downloading lastes wine-staging"
+	echo "================================"
+	echo -e "\n"
+	echo "Downloading and parsing page..."
+	
+	#black magic starts here
+	removeTrash=`html2text -nobs /tmp/wine-staging.html | sed '/wine-staging/!d;/'$release'/!d;/dbg/d;/dev/d;/compat/d' | grep $development | cut -d " " -f 8`
+	
+	wineVersionAmd64=$(echo $removeTrash | cut -d " " -f 3)
+	wineVersionAmd64Libs=$(echo $removeTrash | cut -d " " -f 1)
+	wineVersioni386=$(echo $removeTrash | cut -d " " -f 4)
+	wineVersioni386Libs=$(echo $removeTrash | cut -d " " -f 2)
+	
+	echo -e "Done!\nDonwloading and unpaking wine..."
+	
+	tmp_dir="/tmp/wine-staging/"
+	mkdir $tmp_dir
+	
+	if [ `uname -m` == "x86_64" ]; then
+		echo "Script detected, that your system is amd64, so downloading 64bit wine."
+		echo "Downloading and extracting wine..."
+		# getting wine itself
+		touch $tmp_dir$wineVersionAmd64
+		wget -qO - $repo$wineVersionAmd64 > $tmp_dir$wineVersionAmd64
+		dpkg -x $tmp_dir$wineVersionAmd64 $tmp_dir
+		
+		echo "Downloading and extracting libs..."	
+		touch $tmp_dir$wineVersionAmd64Libs
+		touch $tmp_dir$wineVersioni386Libs
+		
+		wget -qO - $repo$wineVersioni386Libs > $tmp_dir$wineVersionAmd64Libs
+		wget -qO - $repo$wineVersionAmd64Libs > $tmp_dir$wineVersioni386Libs
+		
+		dpkg -x $tmp_dir$wineVersionAmd64Libs $tmp_dir
+		dpkg -x $tmp_dir$wineVersioni386Libs $tmp_dir
+	else
+		echo "Script detected, that your system is i386, so downloading 32bit wine."
+		echo "Downloading wine..."
+		touch $tmp_dir$wineVersioni386
+		wget -qO - $repo$wineVersioni386 > $tmp_dir$wineVersioni386
+		dpkg -x $dir$wineVersioni386 $tmp_dir
+		
+		echo "Downloading libs..."
+		touch $tmp_dir$wineVersioni386Libs
+		wget -qO - $repo$wineVersioni386Libs > $tmp_dir$wineVersioni386Libs
+		dpkg -x $tmp_dir$wineVersioni386Libs $tmp_dir
+	fi
+	
+	echo "Removing temporary data..."
+	echo "Now script ask for su password (using sudo):"
+	sleep 1
+	sudo mv $tmp_dir"opt/wine-staging" "/opt/wine_"$development
+	
+	rm -rf "/tmp/wine-staging"
+	echo "All done! Your wine version now is $v."
+}
+
+function yesno()
+{
+	read ans
+		
+	case $ans in
+		"no") exit 0;;
+		"n") exit 0;;
+		"N") exit 0;;
+		"yes") getStagingWine;;
+		"y") getStagingWine;;
+		"Y") getStagingWine;;
+		*) echo "Put (y)es or (n)o!"; yesno;;
+	esac
+}
+
+#https://notabug.org/kl3/scripts/src/master/build
+function ask()
+{
+	echo -e "${1} [yN]: " 1>&2
+	read REPLY
+	[ "${REPLY}" = y ]
+}
+
+# get wine-hq page to get current wine versions
+wget -qO - $repo > /tmp/wine-staging.html
+development=$(html2text -nobs /tmp/wine-staging.html | awk '/wine-staging/ && /stretch/ {print $2}' | sed 's/[a-Z]*[-_~]//g;s/i386.deb//g;$!d')
+ 
+if [[ $development = $wine_ver_get ]]; then
+	echo "You have lastes wine staging version at this moment: $wine_ver_get"
+	rm /tmp/wine-staging.html
+	exit 0
+else
+	#echo -e "New version ($development.0) are avalable! Do you want to download it?\n[Y(es)/n(o)]:"
+	if ask 'New version ('$development') are avalable! Do you want to download it?'; then
+		getStagingWine
+	fi
+fi
+
+rm /tmp/wine-staging.html

@@ -1,0 +1,117 @@
+#!/usr/bin/env bash
+
+conf=$HOME/.config/wine_helper/settings.conf
+VER="1.9.0"
+
+runtime="$HOME/.steam/runtime/run.sh"
+RESOLUTION="$(xrandr -q | awk -F'current' -F',' 'NR==1 {gsub("( |current)","");print $2}')" # some fun staff of Kron
+dir="/opt/"
+default_prefix=".wine64"
+wine_prefixes_dir="$HOME/.local/share/wine_prefix/"
+
+if [ -f $conf ]; then source $conf; fi
+
+wine_ver_get=`ls $dir | sort --version-sort | sed '/wine/!d;$!d'` # get the lasted version of wine in dir, e.g. wine_1.8.0
+#wine_ver_get=`ls -d1 /opt/wine*`
+wine_path=$dir$wine_ver_get"/bin/"
+
+function help() 
+{
+	local wine=`basename $0`
+	echo -e "$wine-scripts $VER
+Usage: $wine [ARGUMENTS...] PROGRAM [PROGRAM ARGUMENTS...]
+
+$(column -tx -s'%' /usr/local/share/wine_helper/help)
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY (c) 2015-`date +'%Y'` Volk_Milit"
+}
+
+function deleteWineAssociations()
+{
+	rm $HOME/.local/share/applications/wine-extension*
+	sed -i '/FileOpenAssociations/d;/AppName/d;/DesktopFile/d;/Associations/d;/MimeType/d;/OpenWithIcon/d;/ProgID/d' $WINEPREFIX/user.reg
+}
+
+if [ "$1" = "-v" ]; then
+	echo "WINE helper version is $VER"
+	exit 0
+elif [ "$1" = "-h" ]; then
+	help
+	exit 0
+elif [ "$1" = "--check-wine-version" ]; then
+	wine-update
+	exit 0
+elif [ "$1" = "--set-shortcut" ]; then
+	wine-shortcut $@
+	exit 0
+elif [ "$1" = "--delete-junk-associations" ]; then
+	deleteWineAssociations
+	exit 0
+fi
+
+for i in "$@"; do
+	case $i in
+		-wvs=*|--wine-ver-set=*)
+		wine_path=$dir"wine_${i#*=}/bin/"
+		shift
+		;;
+		
+		-np|--new-prefix)
+		WINEPREFIX=$WINEPREFIX $wine_path$ww wineboot
+		shift
+		;;
+		
+		-p=*|--prefix=*)
+		WINEPREFIX=$wine_prefixes_dir"${i#*=}"
+		shift
+		;;
+		
+		-a=*|--arch=*)
+		ARCH="${i#*=}"
+		shift
+		;;
+		
+		-k|--kill)
+		WINEPREFIX=$WINEPREFIX ${wine_path}wineserver -k
+		shift
+		;;
+		
+		-wc|--use-write-copy-varible)
+		wc=1
+		shift
+		;;
+		
+		-sm|--use-shared-memory-varible)
+		sm=1
+		shift
+		;;
+		
+		*)
+		#help
+		#exit 0
+		;;
+	esac
+done
+
+if [ -z "$WINEPREFIX" ]; then WINEPREFIX=$wine_prefixes_dir$default_prefix; fi
+if [ -z $sm ]; then sm=0; fi
+
+prefix=`awk -F "=" '/#arch/ {print $2}' $WINEPREFIX/user.reg`
+
+if [[ ! -z "$ARCH" || "$prefix" = "win32" ]]; then
+	ww="wine"
+	echo "Use 32-bit wine binary"
+else
+	ww="wine64"
+	echo "Use 64-bit wine binary"
+fi
+
+if [ -z $NORUNTIME ]; then RUNTIME=$runtime; echo "Use \"$RUNTIME\" command to provide runtime"; fi
+
+wine_ver=`echo $wine_path | sed 's/[\/_optwineb]//g'`
+
+echo "Running wine verion $wine_ver" 
+STAGING_SHARED_MEMORY=$sm WINEPREFIX=$WINEPREFIX $RUNTIME $wine_path$ww $1 \
+&& CURRENT_RESOLUTION="$(xrandr -q | awk -F'current' -F',' 'NR==1 {gsub("( |current)","");print $2}')" \
+&& if [ "$CURRENT_RESOLUTION" != "$RESOLUTION" ]; then  xrandr -s $RESOLUTION; fi

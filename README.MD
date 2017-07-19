@@ -32,4 +32,4 @@ Configure file must be locate in $HOME/.config/wine_helper/settings.conf. In rep
 - html2text (any)
 
 ## License
-Apache License, Version 2.0
+WTFPL v2

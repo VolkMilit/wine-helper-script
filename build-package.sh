@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 mkdir -p deb/usr/local/bin
 mkdir -p deb/usr/local/share/wine_helper
@@ -9,7 +9,7 @@ Version: 1.9.0
 Section: games
 Architecture: all
 Installed-Size: 19.8K
-Depends: bash | sh | dash, awk, wget, curl, lsb-release, html2text
+Depends: bash | sh | dash, awk, sed, wget, curl, lsb-release, html2text
 Recommended: wine | wine-staging
 Priority: optional
 Maintainer: Volk_Milit <javirrdar@gmail.com>
