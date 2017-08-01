@@ -1,28 +1,18 @@
-#!/usr/bin/env bash
-conf=$HOME/.config/wine_helper/settings.conf
+#!/bin/sh
 
 repo="https://dl.winehq.org/wine-builds/debian/pool/main/"
 dir="/opt/"
 release=$(lsb_release -cs)
 
-if [ -f $conf ]; then
-	source $conf
-fi
+. ./libs/wine_helper_global.shlib
+[ -f $conf ] && . $conf
 
-wine_ver_get=$(ls $dir | sort --version-sort | sed '/wine_/!d;s/wine_//g;$!d') # get the lasted version of wine in dir, e.g. wine_1.8.0
+wine_ver_get=$(ls $dir | sort --version-sort | sed '/wine/!d;$!d') # get the lasted version of wine in dir, e.g. wine_1.8.0
 wine_path=$dir$wine_ver_get"/bin/"
-
-function getPOLLists()
-{
-		LIST="https://www.playonlinux.com/wine/binaries/linux-"$1".lst"
-		curl $LIST | sed 's/.pol;[^ ]*//' > /tmp/list-$1.lst
-		cat /tmp/list-$1.lst
-		rm /tmp/list-$1.lst
-}
 
 # https://www.playonlinux.com/wine/binaries/
 # both 32x and 64x
-function getPOLWine()
+getPOLWine()
 {
 		GET="https://www.playonlinux.com/wine/binaries/linux-"$1"/"$2".pol"
 		wget -qO - $GET > /tmp/wine.tar.gz
@@ -35,17 +25,17 @@ function getPOLWine()
 }
 
 # https://dl.winehq.org/wine-builds/debian/pool/main/
-function getStagingWine()
+getStagingWine()
 {
-	if [[ ! `which sudo` && `ls -ld $dir | cut -d ' ' -f3`!=whoami ]]; then
-		echo "You don't have sudo installed in your system. Run $0 as root or change destanation folder."
+	if [ ! `which sudo` ] && [ `ls -ld $dir | cut -d ' ' -f3`!=whoami ]; then
+		echo "Error: $dir allow write root only users and you don't have [sudo] installed in your system. Please, change destanation folder."
 		exit 0
 	fi
 	
 	echo "================================"
 	echo "Downloading lastes wine-staging"
 	echo "================================"
-	echo -e "\n"
+	echo "\n"
 	echo "Downloading and parsing page..."
 	
 	#black magic starts here
@@ -56,7 +46,7 @@ function getStagingWine()
 	wineVersioni386=$(echo $removeTrash | cut -d " " -f 4)
 	wineVersioni386Libs=$(echo $removeTrash | cut -d " " -f 2)
 	
-	echo -e "Done!\nDonwloading and unpaking wine..."
+	echo "Done!\nDonwloading and unpaking wine..."
 	
 	tmp_dir="/tmp/wine-staging/"
 	mkdir $tmp_dir
@@ -100,39 +90,15 @@ function getStagingWine()
 	echo "All done! Your wine version now is $v."
 }
 
-function yesno()
-{
-	read ans
-		
-	case $ans in
-		"no") exit 0;;
-		"n") exit 0;;
-		"N") exit 0;;
-		"yes") getStagingWine;;
-		"y") getStagingWine;;
-		"Y") getStagingWine;;
-		*) echo "Put (y)es or (n)o!"; yesno;;
-	esac
-}
-
-#https://notabug.org/kl3/scripts/src/master/build
-function ask()
-{
-	echo -e "${1} [yN]: " 1>&2
-	read REPLY
-	[ "${REPLY}" = y ]
-}
-
 # get wine-hq page to get current wine versions
 wget -qO - $repo > /tmp/wine-staging.html
 development=$(html2text -nobs /tmp/wine-staging.html | awk '/wine-staging/ && /stretch/ {print $2}' | sed 's/[a-Z]*[-_~]//g;s/i386.deb//g;$!d')
  
-if [[ $development = $wine_ver_get ]]; then
-	echo "You have lastes wine staging version at this moment: $wine_ver_get"
+if [ "wine_$development" = "$wine_ver_get" ]; then
+	echo "You have lastes wine staging version at this moment: $development"
 	rm /tmp/wine-staging.html
 	exit 0
 else
-	#echo -e "New version ($development.0) are avalable! Do you want to download it?\n[Y(es)/n(o)]:"
 	if ask 'New version ('$development') are avalable! Do you want to download it?'; then
 		getStagingWine
 	fi

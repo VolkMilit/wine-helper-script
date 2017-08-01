@@ -1,25 +1,29 @@
 #!/usr/bin/env bash
 
-conf=$HOME/.config/wine_helper/settings.conf
+. ./libs/wine_helper_global.shlib
 
 wine_prefixes_dir="$HOME/.wine_profiles/"
 default_prefix=".wine64"
 home_overwrite="$HOME/.fake_wine_home"
 
-if [ -f $conf ]; then
-	source $conf
-fi
-
+[ -f $conf ] && . $conf
 default_path=$wine_prefixes_dir$default_prefix
 
-function sandboxing()
+sandboxing()
 {
+	die
+	
 	a1=("Мои документы" "Мои рисунки" "Мои фильмы" "Моя музыка" "Рабочий стол")
 
 	for i in `seq 0 4`; do
 		rm "$default_path/drive_c/users/$USER/${a1[i]}" 1>&2
 		ln -s $home_overwrite "$default_path/drive_c/users/$USER/${a1[i]}" 1>&2
 	done
+}
+
+save()
+{
+	die
 }
 
 for i in "$@"; do
@@ -45,3 +49,14 @@ for i in "$@"; do
 		;;
 	esac
 done
+
+if [ "$1" = "--sandbox" ] || [ "$1" = "-S" ]; then
+	sandboxing
+	exit 0
+elif [ "$1" = "--save" ] || [ "$1" = "-s" ]; then
+	save
+	exit 0
+elif [ "$1" = "-h" ]; then
+	help
+	exit 0
+fi

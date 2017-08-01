@@ -5,14 +5,15 @@
 --version%Output version information and exit
 --patches%Output patch information and exit
 --check-libs%Checks if shared libs are installed
---new-prefix|-np%Create new prefix
---prefix|-p%Set wine prefix (similar to \$WINEPREFIX)
---arch|-a%Set wine arch (similar to \$ARCH)
---wine-version-set|-wvs%Set wine version to use
+-np, --new-prefix%Create new prefix
+-p, --prefix%Set wine prefix (similar to \$WINEPREFIX)
+-a, --arch%Set wine arch (similar to \$ARCH)
+-wvs, --wine-version-set%Set wine version to use
 --check-wine-version%Check if wine-starging need to be updated (similar to wine-update)
 --set-shortcut%Set local desktop file for specific exe
---kill|-k%Try to kill wineserver
---use-shared-memory-varible|-sm%Wine Staging can optimize some wineserver calls by using shared memory
+-k, --kill%Try to kill wineserver
+-sm, --use-shared-memory-varible%Wine Staging can optimize some wineserver calls by using shared memory
+-wc, --write-copy%
 --delete-junk-associations%Delete junk associations with files in current WINE prefix
 %
 Some WINE default varibles:

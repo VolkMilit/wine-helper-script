@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+source ./libs/wine_helper_global.shlib
+[ -f $conf ] && source $conf
+
+if [ -z `which winetricks` ]; then
+	curl -# https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks -o $HOME/.local/bin/winetricks
+fi
