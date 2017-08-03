@@ -1,8 +1,53 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 source ./libs/wine_helper_global.shlib
+
+runtime="$HOME/.steam/runtime/run.sh"
+dir="/opt/"
+default_prefix=".wine64"
+wine_prefixes_dir="$HOME/.local/share/wine_prefix/"
+
 [ -f $conf ] && source $conf
+
+wine_ver_get=$(ls $dir | sort --version-sort | sed '/wine/!d;$!d') # get the lasted version of wine in dir, e.g. wine_1.8.0
+wine_path=$dir$wine_ver_get"/bin/"
 
 if [ -z `which winetricks` ]; then
 	curl -# https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks -o $HOME/.local/bin/winetricks
 fi
+
+for i in "$@"; do
+	case $i in
+		-wvs=*|--wine-ver-set=*)
+		wine_path=$dir"wine_${i#*=}/bin/"
+		shift
+		;;
+		
+		-p=*|--prefix=*)
+		WINEPREFIX=$wine_prefixes_dir"${i#*=}"
+		shift
+		;;
+		
+		-a=*|--arch=*)
+		ARCH="${i#*=}"
+		shift
+		;;
+		
+		*)
+		#help
+		#exit 0
+		;;
+	esac
+done
+
+[ -z "$WINEPREFIX" ] && WINEPREFIX=$wine_prefixes_dir$default_prefix
+[ -z "$NORUNTIME" ] && RUNTIME=$runtime
+prefix=`awk -F "=" '/#arch/ {print $2}' $WINEPREFIX/user.reg`
+
+if [ ! -z "$ARCH" ] || [ "$prefix" = "win32" ]; then
+	ww="wine"
+else
+	ww="wine64"
+fi
+
+WINEPREFIX=$WINEPREFIX WINE=$wine_path$ww WINESERVER=$wine_path"wineserver" $RUNTIME winetricks "$@"
