@@ -10,7 +10,6 @@
 -a, --arch%Set wine arch (similar to \$ARCH)
 -wvs, --wine-version-set%Set wine version to use
 --check-wine-version%Check if wine-starging need to be updated (similar to wine-update)
---set-shortcut%Set local desktop file for specific exe
 -k, --kill%Try to kill wineserver
 -sm, --use-shared-memory-varible%Wine Staging can optimize some wineserver calls by using shared memory
 -wc, --write-copy%

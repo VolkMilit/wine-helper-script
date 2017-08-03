@@ -4,6 +4,5 @@
 -p, --prefix%Set wine prefix (similar to \$WINEPREFIX)
 -a, --arch%Set wine arch (similar to \$ARCH)
 -wvs, --wine-version-set|%Set wine version to use
---set-shortcut%Set local desktop file for specific exe
 -S, --sandbox%Sandboxing current prefix
 -s, --save%Don't documented yet

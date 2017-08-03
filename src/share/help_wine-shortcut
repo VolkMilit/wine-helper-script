@@ -1,0 +1,8 @@
+-n, --name%Set name
+-i, --icon%Set icon
+-e, --exec%Set execution
+-p, --prefix%Set prefix
+%
+or
+%
+-a, --auto [exe]%Try auto mode (may not work as expected)
