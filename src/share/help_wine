@@ -6,14 +6,15 @@
 --patches%Output patch information and exit
 --check-libs%Checks if shared libs are installed
 -np, --new-prefix%Create new prefix
--p, --prefix%Set wine prefix (similar to \$WINEPREFIX)
--a, --arch%Set wine arch (similar to \$ARCH)
+-p, --prefix%Set wine prefix (similar to use WINEPREFIX=...)
+-a, --arch%Set wine arch (similar to use ARCH=...)
 -wvs, --wine-version-set%Set wine version to use
 --check-wine-version%Check if wine-starging need to be updated (similar to wine-update)
 -k, --kill%Try to kill wineserver
 -sm, --use-shared-memory-varible%Wine Staging can optimize some wineserver calls by using shared memory
 -wc, --write-copy%
 --delete-junk-associations%Delete junk associations with files in current WINE prefix
+-d, -debug%Off winedebug (similar to WINEDEBUG=-all)
 %
 Some WINE default varibles:
 %

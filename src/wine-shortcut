@@ -1,31 +1,10 @@
-#!/usr/bin/env bash
+#!/bin/sh
+
+. /usr/local/lib/wine_helper/wine_helper_global.shlib
 
 pwd=`echo ${PWD} | sed -e 's/.*/"&"/g'`
 
-function help() 
-{
-	echo "Usage: $0
-       $0 [-n=* -i=* -e=* -p=*]
-       $0 -n | --name			        Set name
-       $0 -i | --icon				Set icon
-       $0 -e | --exec				Set execution
-       $0 -p | --prefix				Set prefix
-       $0 -a | --auto (exe)			Try auto mode (may not work as expected)
-       
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY (c) 2015 Volk_Milit"
-}
-
-#https://notabug.org/kl3/scripts/src/master/build
-function ask()
-{
-	echo -e "${1} [yN]: " 1>&2
-	read REPLY
-	[ "${REPLY}" = y ]
-}
-
-if [[ "$1" = "-a" || "$1" = "--auto" ]]; then
+if [ "$1" = "-a" ] || [ "$1" = "--auto" ]; then
 	ind=0
 	exe_list=$(ls -l | egrep "*-*-x" | cut -d " " -f 11)
 	
@@ -38,13 +17,16 @@ if [[ "$1" = "-a" || "$1" = "--auto" ]]; then
 	
 	tmp=`echo $pwd/$2 | sed 's|.*/||'`
 	name=`basename "$(echo $pwd/$tmp | sed 's/\/'$tmp'//g;s/"//g')"`
-	prefix=.wine_tesv
+	prefix=".wine_tesv"
 	
-	if [[ -f "${PWD}/icon.ico" ]]; then
+	if [ -f "${PWD}/icon.ico" ]; then
 		convert "${PWD}/icon.ico" "${PWD}/icon.png"
+		icon=${PWD}/icon.png
+	else
+		convert "${PWD}/$(ls | awk '/ico/')" "${PWD}/$(ls | awk 'gsub(".ico", "")').png"
+		icon=${PWD}/$(ls | awk 'gsub(".ico", "")').png
 	fi
 	
-	icon=${PWD}/icon.png
 else
 	for i in "$@"; do
 		case $i in

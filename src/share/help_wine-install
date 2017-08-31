@@ -1,4 +1,8 @@
--h, --help%Display this help and exit
+-h%Display this help and exit
 -p, --prefix%Set wine prefix (similar to \$WINEPREFIX)
 -a, --arch%Set wine arch (similar to \$ARCH)
 -wvs, --wine-version-set%Set wine version to use
+--help%Display winetricks help and exit
+%
+All waribles and options from winetricks are supported, but must be used after $0 options.
+%

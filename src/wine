@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. ./libs/wine_helper_global.shlib
+. /usr/local/lib/wine_helper/wine_helper_global.shlib
 
 runtime="$HOME/.steam/runtime/run.sh"
 RESOLUTION="$(xrandr -q | awk -F'current' -F',' 'NR==1 {gsub("( |current)","");print $2}')" # some fun staff from Kron
@@ -10,15 +10,8 @@ wine_prefixes_dir="$HOME/.local/share/wine_prefix/"
 
 [ -f $conf ] && . $conf
 
-wine_ver_get=`ls $dir | sort --version-sort | sed '/wine/!d;$!d'` # get the lasted version of wine in dir, e.g. wine_1.8.0
-#wine_ver_get=`ls -d1 /opt/wine*`
+wine_ver_get=$(ls $dir | sort --version-sort | sed '/wine/!d;$!d') # get the lasted version of wine in dir, e.g. wine_1.8.0
 wine_path=$dir$wine_ver_get"/bin/"
-
-deleteWineAssociations()
-{
-	rm $HOME/.local/share/applications/wine-extension*
-	sed -i '/FileOpenAssociations/d;/AppName/d;/DesktopFile/d;/Associations/d;/MimeType/d;/OpenWithIcon/d;/ProgID/d' $WINEPREFIX/user.reg
-}
 
 if [ "$1" = "-v" ]; then
 	echo "WINE helper version is $VER"
@@ -28,12 +21,6 @@ elif [ "$1" = "-h" ]; then
 	exit 0
 elif [ "$1" = "--check-wine-version" ]; then
 	wine-update
-	exit 0
-elif [ "$1" = "--set-shortcut" ]; then
-	wine-shortcut $@
-	exit 0
-elif [ "$1" = "--delete-junk-associations" ]; then
-	deleteWineAssociations
 	exit 0
 fi
 
@@ -74,6 +61,11 @@ for i in "$@"; do
 		shift
 		;;
 		
+		-d|-debug)
+		WINEDEBUG=-all
+		shift
+		;;
+		
 		*)
 		#help
 		#exit 0
@@ -82,8 +74,9 @@ for i in "$@"; do
 done
 
 [ -z "$WINEPREFIX" ] && WINEPREFIX=$wine_prefixes_dir$default_prefix
-[ -z $sm ] && sm=0
-[ -z $wc ] && wc=0
+[ -z "$sm" ] && sm=0
+[ -z "$wc" ] && wc=0
+[ -z "$NORUNTIME" ] && RUNTIME=$runtime
 
 prefix=`awk -F "=" '/#arch/ {print $2}' $WINEPREFIX/user.reg`
 
@@ -94,18 +87,18 @@ else
 fi
 
 if [ -z "$WINEDEBUG" ]; then
-	if [ "$ww" = "wine64" ]; then 
+	if [ "$ww" = "wine" ]; then
 		echo "Use 32-bit wine binary"; 
 	else 
 		echo "Use 64-bit wine binary"; 
 	fi
 	
-	if [ -z $NORUNTIME ]; then RUNTIME=$runtime; echo "Use \"$RUNTIME\" command to provide runtime"; fi
-	echo "Warning, missing libs are: " $(wine --check-libs | awk '/missing/ {gsub(":",""); print $1}')
+	echo "Use \"$RUNTIME\" command to provide runtime"
+	echo "Warning, missing libs are: " $($wine_path$ww --check-libs | awk '/missing/ {gsub(":",""); print $1}')
 fi
 
-wine_ver=`echo $wine_path | sed 's/[\/_optwineb]//g'`
+wine_ver=$(echo $wine_ver_get | tr -d '_wine')
 echo "Running wine verion $wine_ver" 
 STAGING_SHARED_MEMORY=$sm STAGING_WRITE_COPY=$wc WINEPREFIX=$WINEPREFIX $RUNTIME $wine_path$ww $1 \
 && CURRENT_RESOLUTION="$(xrandr -q | awk -F'current' -F',' 'NR==1 {gsub("( |current)","");print $2}')" \
-&& if [ "$CURRENT_RESOLUTION" != "$RESOLUTION" ]; then  xrandr -s $RESOLUTION; fi
+&& [ "$CURRENT_RESOLUTION" != "$RESOLUTION" ] && xrandr -s $RESOLUTION

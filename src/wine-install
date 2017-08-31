@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. ./libs/wine_helper_global.shlib
+. /usr/local/lib/wine_helper/wine_helper_global.shlib
 
 runtime="$HOME/.steam/runtime/run.sh"
 dir="/opt/"

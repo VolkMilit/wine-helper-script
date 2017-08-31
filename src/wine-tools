@@ -1,10 +1,9 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
-. ./libs/wine_helper_global.shlib
+. /usr/local/lib/wine_helper/wine_helper_global.shlib
 
-wine_prefixes_dir="$HOME/.wine_profiles/"
+wine_prefixes_dir="$HOME/.local/share/wine_prefix/"
 default_prefix=".wine64"
-home_overwrite="$HOME/.fake_wine_home"
 
 [ -f $conf ] && . $conf
 default_path=$wine_prefixes_dir$default_prefix
@@ -13,7 +12,8 @@ sandboxing()
 {
 	die
 	
-	a1=("Мои документы" "Мои рисунки" "Мои фильмы" "Моя музыка" "Рабочий стол")
+	local home_overwrite="$HOME/.fake_wine_home"
+	local a1=("Мои документы" "Мои рисунки" "Мои фильмы" "Моя музыка" "Рабочий стол")
 
 	for i in `seq 0 4`; do
 		rm "$default_path/drive_c/users/$USER/${a1[i]}" 1>&2
@@ -21,9 +21,10 @@ sandboxing()
 	done
 }
 
-save()
+deleteWineAssociations()
 {
-	die
+	rm $HOME/.local/share/applications/wine-extension*
+	sed -i '/FileOpenAssociations/d;/AppName/d;/DesktopFile/d;/Associations/d;/MimeType/d;/OpenWithIcon/d;/ProgID/d' $WINEPREFIX/user.reg
 }
 
 for i in "$@"; do
@@ -53,8 +54,8 @@ done
 if [ "$1" = "--sandbox" ] || [ "$1" = "-S" ]; then
 	sandboxing
 	exit 0
-elif [ "$1" = "--save" ] || [ "$1" = "-s" ]; then
-	save
+elif [ "$1" = "--delete-junk-associations" ]; then
+	deleteWineAssociations
 	exit 0
 elif [ "$1" = "-h" ]; then
 	help
