@@ -23,10 +23,10 @@ fetchSystem()
 {	
 	local sys=$(uname -s)
 	
-	if [ $(sys) = "GNU" ]; then
+	if [ $sys = "GNU" ]; then
 		echo "Hurd is not supported."
 		exit 1
-	elif [ $(sys) = "SunOS" ]; then
+	elif [ $sys = "SunOS" ]; then
 		echo "Solaris\OpenIndiana\SmartOS is not supported."
 		exit 1
 	fi
@@ -79,7 +79,7 @@ getStagingWine()
 	tmp_dir="/tmp/wine-staging/"
 	mkdir $tmp_dir
 	
-	if [ "$mach" = "x86_64" ] || [ "$mach" = "k1om" ]; then
+	if [ "$(uname -m)" = "x86_64" ] || [ "$(uname -m)" = "k1om" ]; then
 		echo "Script detected, that your system is amd64, so downloading 64bit wine."
 		echo "Downloading and extracting wine..."
 		# getting wine itself
@@ -134,6 +134,8 @@ askStagingWine()
 		fi
 	fi
 }
+
+fetchMachine
 
 if [ "$1" = "staging" ]; then
 	askStagingWine
