@@ -36,4 +36,4 @@ md5sum $(find ./ -type f | awk '!/^\.\/DEBIAN/ { print substr($0, 3) }') > DEBIA
 cd ..
 fakeroot dpkg-deb --build deb
 #lintian deb.deb
-mv deb.deb wine-scripts-"$VER"_amd64.deb
+mv deb.deb wine-scripts-"$VER"_any.deb

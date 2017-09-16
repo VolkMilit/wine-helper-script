@@ -26,7 +26,9 @@ if [ "$1" = "-a" ] || [ "$1" = "--auto" ]; then
 		convert "${PWD}/$(ls | awk '/ico/')" "${PWD}/$(ls | awk 'gsub(".ico", "")').png"
 		icon=${PWD}/$(ls | awk 'gsub(".ico", "")').png
 	fi
-	
+elif [ "$1" = "" ]; then
+	help
+	exit 0
 else
 	for i in "$@"; do
 		case $i in
@@ -51,6 +53,11 @@ else
 			;;
 		
 			-h|--help)
+			help
+			exit 0
+			;;
+			
+			*)
 			help
 			exit 0
 			;;
