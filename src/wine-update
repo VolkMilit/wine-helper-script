@@ -67,7 +67,8 @@ getStagingWine()
 	echo "Downloading and parsing page..."
 	
 	#black magic starts here
-	removeTrash=`html2text -nobs /tmp/wine-staging.html | sed '/wine-staging/!d;/'$release'/!d;/dbg/d;/dev/d;/compat/d' | grep $development | cut -d " " -f 8`
+	dev=$(echo $development | sed 's/\./\\./g') #workaround grep can't filter someting with dot symbol
+	removeTrash=`html2text -nobs /tmp/wine-staging.html | grep "$dev" | sed '/wine-staging/!d;/'$release'/!d;/dbg/d;/dev/d;/compat/d' | cut -d " " -f 8`
 	
 	wineVersionAmd64=$(echo $removeTrash | cut -d " " -f 3)
 	wineVersionAmd64Libs=$(echo $removeTrash | cut -d " " -f 1)
