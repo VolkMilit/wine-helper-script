@@ -6,19 +6,35 @@ wine_prefixes_dir="$HOME/.local/share/wine_prefix/"
 default_prefix=".wine64"
 
 [ -f $conf ] && . $conf
-default_path=$wine_prefixes_dir$default_prefix
 
 sandboxing()
 {
-	die
+	[ -z $WINEPREFIX ] && $WINEPREFIX=$wine_prefixes_dir$default_prefix
 	
-	local home_overwrite="$HOME/.fake_wine_home"
-	local a1=("Мои документы" "Мои рисунки" "Мои фильмы" "Моя музыка" "Рабочий стол")
-
-	for i in `seq 0 4`; do
-		rm "$default_path/drive_c/users/$USER/${a1[i]}" 1>&2
-		ln -s $home_overwrite "$default_path/drive_c/users/$USER/${a1[i]}" 1>&2
+	#array support for sh :D
+	a="Мои документы;Мои рисунки;Мои фильмы;Моя музыка;Рабочий стол"
+	
+	for i in `seq 1 5`; do
+		if [ -r "$WINEPREFIX/drive_c/users/$USER/$(array "$a" $i)" ]; then
+			rm "$WINEPREFIX/drive_c/users/$USER/$(array "$a" $i)"
+		fi
+		ln -s "$fake_home" "$WINEPREFIX/drive_c/users/$USER/$(array "$a" $i)"
 	done
+}
+
+deleteTrash()
+{
+	[ -z $WINEPREFIX ] && WINEPREFIX=$wine_prefixes_dir$default_prefix
+	
+	rm -rv $WINEPREFIX/drive_c/users/$USER/dd_*.txt
+	rm -rv $WINEPREFIX/drive_c/users/$USER/uxeventlog.txt
+	rm -rv $WINEPREFIX/drive_c/users/$USER/Cookies/*
+	rm -rfv $WINEPREFIX/drive_c/users/$USER/Local Settings/Temporary Internet Files/Content.IE5/*
+	rm -rfv $WINEPREFIX/drive_c/users/$USER/Temp/*
+	rm -rv "$WINEPREFIX/drive_c/users/Public/Рабочий стол/"*
+	rm -rfv "$WINEPREFIX/drive_c/Program Files (x86)/InstallShield Installation Information/"*
+	rm -rv $WINEPREFIX/drive_c/eula*.txt
+	rm -rv $WINEPREFIX/drive_c/install.res*.dll
 }
 
 deleteWineAssociations()
@@ -51,8 +67,11 @@ for i in "$@"; do
 	esac
 done
 
-if [ "$1" = "--sandbox" ] || [ "$1" = "-S" ]; then
+if [ "$1" = "--sandbox" ] || [ "$1" = "-s" ]; then
 	sandboxing
+	exit 0
+elif [ "$1" = "--delete-trash" ]; then
+	deleteTrash
 	exit 0
 elif [ "$1" = "--delete-junk-associations" ]; then
 	deleteWineAssociations

@@ -11,7 +11,7 @@ I position this as Play On Linux without bloatnes and dependencies like Python a
 ## wine
 - Main binary, that actually running right version of wine, prefix and arch
 - Kill wineserver just type wine -k
-- Restore native resolution if resolution was change (TODO)
+- Restore native resolution if resolution was change
 - Running application in desktop mode (TODO)
 - Using runtime library (like steam runtime) for not to install all that x86 library in system
 - Cut off internet connection by one option (need firejail) (TODO)
@@ -30,7 +30,7 @@ cd /folder_with_exe; wine -p=prefix exe
 ## wine-tools
 Various tools to make life easier:
 - Delete junk associations with useless wine soft. Why do you need them, if you're using *NIX, right?
-- Sandboxing prefix by delete all links to $HOME without needed to using winetricks (TODO)
+- Sandboxing prefix by delete all links to $HOME without needed to using winetricks
 
 ## Configure file
 Configure file must be locate in $HOME/.config/wine_helper/settings.conf. In repo root directory is an example settings.conf. File well documented.

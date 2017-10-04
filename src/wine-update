@@ -38,8 +38,8 @@ fetchSystem()
 # both 32x and 64x
 getPOLWine()
 {
-		if [ -z "$1" ] || [ -z "$1" ]; then
-			echo "Error getting Play On Linux wine binaries. First or second parametrs is empty. Must be: $0 wine-1.5.26 [amd64]"
+		if [ -z "$1" ] || [ -z "$2" ]; then
+			echo "Error getting Play On Linux wine binaries. First or second parametrs is empty. Must be: $0 wine[-staing]-1.5.26 [amd64]"
 		fi
 	
 		GET="https://www.playonlinux.com/wine/binaries/linux-"$1"/"PlayOnLinux-$2-linux-$1".pol"

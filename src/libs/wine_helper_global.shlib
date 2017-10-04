@@ -23,6 +23,15 @@ die()
 	exit 0
 }
 
+#pseudo array support for sh :D Usage: array "word1;word2;word3;word4;..." array_word_number
+#numers starts from 1
+array()
+{
+	count=$(($(echo $1 | grep -o ';' | wc -l) + 1))
+	[ $2 -gt $count ] && return #stack overflow
+	echo $1 | cut -d';' -f$2
+}
+
 #https://notabug.org/kl3/scripts/src/master/build
 ask()
 {

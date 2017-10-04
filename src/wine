@@ -99,6 +99,7 @@ fi
 
 wine_ver=$(echo $wine_ver_get | tr -d '_wine')
 echo "Running wine verion $wine_ver" 
-STAGING_SHARED_MEMORY=$sm STAGING_WRITE_COPY=$wc WINEPREFIX=$WINEPREFIX $RUNTIME $wine_path$ww $1 \
-&& CURRENT_RESOLUTION="$(xrandr -q | awk -F'current' -F',' 'NR==1 {gsub("( |current)","");print $2}')" \
-&& [ "$CURRENT_RESOLUTION" != "$RESOLUTION" ] && xrandr -s $RESOLUTION
+STAGING_SHARED_MEMORY=$sm STAGING_WRITE_COPY=$wc WINEPREFIX=$WINEPREFIX $RUNTIME $wine_path$ww $1
+
+CURRENT_RESOLUTION="$(xrandr -q | awk -F'current' -F',' 'NR==1 {gsub("( |current)","");print $2}')"
+[ "$CURRENT_RESOLUTION" != "$RESOLUTION" ] && xrandr -s $RESOLUTION

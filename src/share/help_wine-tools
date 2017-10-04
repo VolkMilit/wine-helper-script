@@ -3,6 +3,7 @@
 --help%Display wine help and exit
 -p, --prefix%Set wine prefix (similar to \$WINEPREFIX)
 -a, --arch%Set wine arch (similar to \$ARCH)
--wvs, --wine-version-set|%Set wine version to use
--S, --sandbox%Sandboxing current prefix
--s, --save%Don't documented yet
+-wvs, --wine-version-set%Set wine version to use
+-s, --sandbox%Sandboxing current prefix
+--delete-trash%Delete tmp files from prefix
+--delete-junk-associations%Delete all associations from $HOME/.local/applications and registry
