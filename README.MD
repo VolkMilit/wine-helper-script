@@ -10,7 +10,7 @@ I position this as Play On Linux without bloatnes and dependencies like Python a
 
 ## wine
 - Main binary, that actually running right version of wine, prefix and arch
-- Kill wineserver just type wine -k
+- Kill wineserver just by typing: $ wine -k
 - Restore native resolution if resolution was change
 - Running application in desktop mode (TODO)
 - Using runtime library (like steam runtime) for not to install all that x86 library in system

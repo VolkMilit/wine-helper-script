@@ -1,13 +1,16 @@
 #!/bin/sh
 
-VER="1.10.0"
+VER="1.10.1"
 
 conf=$HOME/.config/wine_helper/settings.conf
 [ ! -f $conf ] && conf=/usr/local/share/wine_helper/settings.conf
 
 help()
 {
-	local wine=`basename $0`
+	wine=`basename $0`
+	
+	[ ! -r /usr/local/share/wine_helper/help_$wine ] && echo "There is no help page for $wine." && exit 0
+	
 	echo "wine-scripts-helper $VER
 Usage: $wine [ARGUMENTS...] PROGRAM [PROGRAM ARGUMENTS...]
 

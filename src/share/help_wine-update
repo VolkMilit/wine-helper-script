@@ -1,0 +1,3 @@
+--help%Display this help and exit
+staging [-N]%Get wine-staging from official repository (only for Debian or Debian-like, becouse of dependencies). The -N option disable fetching the lastes changelog, if new version avalable.
+pol [wine_version] [i386 (amd64)]%Get specific Play On Linux wine

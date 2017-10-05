@@ -12,7 +12,7 @@ wine_path=$dir$wine_ver_get"/bin/"
 
 fetchMachine()
 {
-	local mach=$(uname -m)
+	mach=$(uname -m)
 	if [ "$mach" = "armv6l" ] || [ "$mach" = "armv7l" ] || [ "$mach" = "ppc" ] || [ "$mach" = "ppc64" ] || [ "$mach" = "mips" ] || [ "$mach" = "sparc64" ]; then
 		echo "arm\ppc\mips\sparc machines are not supporting. Please, use your distribution repository or build wine for yourself."
 		exit 1
@@ -82,13 +82,14 @@ getStagingWine()
 	
 	if [ "$(uname -m)" = "x86_64" ] || [ "$(uname -m)" = "k1om" ]; then
 		echo "Script detected, that your system is amd64, so downloading 64bit wine."
-		echo "Downloading and extracting wine..."
+		echo -n "Downloading and extracting wine..."
 		# getting wine itself
 		touch $tmp_dir$wineVersionAmd64
 		wget -qO - $repo$wineVersionAmd64 > $tmp_dir$wineVersionAmd64
 		dpkg -x $tmp_dir$wineVersionAmd64 $tmp_dir
+		echo " Done!"
 		
-		echo "Downloading and extracting libs..."	
+		echo -n "Downloading and extracting libs..."	
 		touch $tmp_dir$wineVersionAmd64Libs
 		touch $tmp_dir$wineVersioni386Libs
 		
@@ -97,17 +98,20 @@ getStagingWine()
 		
 		dpkg -x $tmp_dir$wineVersionAmd64Libs $tmp_dir
 		dpkg -x $tmp_dir$wineVersioni386Libs $tmp_dir
+		echo " Done!"
 	else
 		echo "Script detected, that your system is i386, so downloading 32bit wine."
-		echo "Downloading wine..."
+		echo -n "Downloading wine..."
 		touch $tmp_dir$wineVersioni386
 		wget -qO - $repo$wineVersioni386 > $tmp_dir$wineVersioni386
 		dpkg -x $dir$wineVersioni386 $tmp_dir
+		echo " Done!"
 		
-		echo "Downloading libs..."
+		echo -n "Downloading libs..."
 		touch $tmp_dir$wineVersioni386Libs
 		wget -qO - $repo$wineVersioni386Libs > $tmp_dir$wineVersioni386Libs
 		dpkg -x $tmp_dir$wineVersioni386Libs $tmp_dir
+		echo " Done!"
 	fi
 	
 	echo "Removing temporary data..."
@@ -116,21 +120,44 @@ getStagingWine()
 	sudo mv $tmp_dir"opt/wine-staging" "/opt/wine_"$development
 	
 	rm -rf "/tmp/wine-staging"
-	echo "All done! Your wine version now is $v."
+	echo "All done! Your wine version now is $development."
+}
+
+fetchStagingNews()
+{
+	echo -n "Fetch changelog..."
+	
+	#little workaround with asterics, cuz' while read will read asterics as 'all files in directory'
+	curl --silent https://wine-staging.com/news.html | html2text -nobs -style pretty | sed 's/*/-/g' > /tmp/wine_staging_news
+	
+	echo " Done!"
+	
+	while read LINE; do 
+		[ "$LINE" = "Read_more" ] && break
+		echo $LINE
+	done < /tmp/wine_staging_news | sed '1,20d'
+	
+	rm /tmp/wine_staging_news
 }
 
 askStagingWine()
 {
+	echo -n "Parsing page, be patient..."
 	# get wine-hq page to get current wine versions
 	wget -qO - $repo > /tmp/wine-staging.html
 	development=$(html2text -nobs /tmp/wine-staging.html | awk '/wine-staging/ && /'$release'/ {print $2}' | sed 's/[a-Z]*[-_~]//g;s/i386.deb//g;$!d')
+	echo " Done!"
  
 	if [ "wine_$development" = "$wine_ver_get" ]; then
 		echo "You have lastes wine staging version at this moment: $development"
 		rm /tmp/wine-staging.html
 		exit 0
 	else
-		if ask 'New version ('$development') are avalable! Do you want to download it?'; then
+		echo 'New version ('$development') are avalable!\n'
+		[ "$1" != "-N" ] && fetchStagingNews
+		echo '\n'
+		
+		if ask 'Do you want to download it?'; then
 			getStagingWine
 		fi
 	fi
@@ -139,13 +166,16 @@ askStagingWine()
 fetchMachine
 
 if [ "$1" = "staging" ]; then
-	askStagingWine
+	askStagingWine $2
 elif [ "$1" = "pol" ]; then
 	die
 	getPOLWine "$2" "$3"
+elif [ "$1" = "--help" ]; then
+	help
+	exit 0
 else
-	fetchSystem
-	#askStagingWine
+	#fetchSystem
+	askStagingWine $2
 fi
 
 [ -f "/tmp/wine-staging.html" ] && rm /tmp/wine-staging.html
