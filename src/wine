@@ -97,6 +97,11 @@ if [ -z "$WINEDEBUG" ]; then
 	echo "Warning, missing libs are: " $($wine_path$ww --check-libs | awk '/missing/ {gsub(":",""); print $1}')
 fi
 
+if [ "$sandboxing" = "true" ]; then
+	WINEPREFIX=$WINEPREFIX $wine_path$ww wineboot
+	WINEPREFIX=$WINEPREFIX wine-tools -s
+fi
+
 wine_ver=$(echo $wine_path | awk -F'wine_' '{gsub("/bin/",""); print $2}')
 echo "Running wine verion $wine_ver" 
 STAGING_SHARED_MEMORY=$sm STAGING_WRITE_COPY=$wc WINEPREFIX=$WINEPREFIX $RUNTIME $wine_path$ww $1

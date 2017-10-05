@@ -1,4 +1,4 @@
-# wine script v1.10.0
+# wine script v1.10.1
 
 Just a little sh scripts, debian package and a bash\zsh compiletion module for my personal use. Maybe someone will find it useful.
 I position this as Play On Linux without bloatnes and dependencies like Python and GTK, because I don't need this. Actually it doesn't have some POL futures, but who cares, when you may use standart wine tools? I'm mostly follow [http://suckless.org/philosophy](Suckless philosophy).
@@ -15,9 +15,11 @@ I position this as Play On Linux without bloatnes and dependencies like Python a
 - Running application in desktop mode (TODO)
 - Using runtime library (like steam runtime) for not to install all that x86 library in system
 - Cut off internet connection by one option (need firejail) (TODO)
+- Delete all reference to $HOME directory automaticly, if this option is enable in settings.conf
 
 ## wine-update
 - Downloading and install lastes wine staging (Debian-based\Ubuntu-based\Mint-based only)
+- Fetching lastes changelog for staging
 - Downloading and install any version from POL (Including Linux, FreeBSD, Darwin all x86\x86_64) (TODO)
 
 ## wine-shortcut
