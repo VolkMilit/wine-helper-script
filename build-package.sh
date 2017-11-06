@@ -7,6 +7,7 @@ mkdir -p deb/usr/local/lib/wine_helper
 mkdir -p deb/usr/local/share/wine_helper
 mkdir -p deb/usr/local/etc/wine_helper
 mkdir -p deb/DEBIAN
+
 cat > deb/DEBIAN/control << EOF
 Package: wine-scripts
 Version: $VER
@@ -25,11 +26,10 @@ cp src/wine* deb/usr/local/bin
 cp src/libs/wine* deb/usr/local/lib/wine_helper
 cp src/share/help* deb/usr/local/share/wine_helper
 cp src/share/settings.conf deb/usr/local/etc/wine_helper
-chmod 0644 deb/usr/local/bin/*
-chmod 0644 deb/usr/local/lib/wine_helper/*
-chmod 0644 deb/usr/local/share/wine_helper/*
-chmod 0644 deb/usr/local/etc/wine_helper/*
-chmod +x deb/usr/local/bin/*
+sudo chown root:root  deb/usr/local/bin/*
+sudo chown root:root  deb/usr/local/lib/wine_helper/*
+sudo chown root:root  deb/usr/local/share/wine_helper/*
+sudo chown root:root  deb/usr/local/etc/wine_helper/*
 
 cd deb
 md5sum $(find ./ -type f | awk '!/^\.\/DEBIAN/ { print substr($0, 3) }') > DEBIAN/md5sums ; chmod 0644 DEBIAN/md5sums

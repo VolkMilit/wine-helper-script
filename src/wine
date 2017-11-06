@@ -78,7 +78,7 @@ done
 [ -z "$wc" ] && wc=0
 [ -z "$NORUNTIME" ] && RUNTIME=$runtime
 
-prefix=`awk -F "=" '/#arch/ {print $2}' $WINEPREFIX/user.reg`
+prefix=$(awk -F "=" '/#arch/ {print $2}' $WINEPREFIX/user.reg)
 
 if [ ! -z "$ARCH" ] || [ "$prefix" = "win32" ]; then
 	ww="wine"

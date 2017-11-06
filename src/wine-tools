@@ -9,12 +9,16 @@ default_prefix=".wine64"
 
 sandboxing()
 {
-	[ -z $WINEPREFIX ] && $WINEPREFIX=$wine_prefixes_dir$default_prefix
+	loc=$(locale | grep LANG | cut -d= -f2 | cut -d_ -f1)
 	
 	#array support for sh :D
-	a="Мои документы;Мои рисунки;Мои фильмы;Моя музыка;Рабочий стол"
+	if [ "$loc" = "ru" ]; then
+		a="Мои документы;Мои рисунки;Мои фильмы;Моя музыка;Рабочий стол"
+	else
+		a="My documents;My pictures;My videos;My music;Desktop"
+	fi
 	
-	for i in `seq 1 5`; do
+	for i in $(seq 1 5); do
 		if [ -r "$WINEPREFIX/drive_c/users/$USER/$(array "$a" $i)" ]; then
 			rm "$WINEPREFIX/drive_c/users/$USER/$(array "$a" $i)"
 		fi
@@ -24,8 +28,6 @@ sandboxing()
 
 deleteTrash()
 {
-	[ -z $WINEPREFIX ] && WINEPREFIX=$wine_prefixes_dir$default_prefix
-	
 	rm -rv $WINEPREFIX/drive_c/users/$USER/dd_*.txt
 	rm -rv $WINEPREFIX/drive_c/users/$USER/uxeventlog.txt
 	rm -rv $WINEPREFIX/drive_c/users/$USER/Cookies/*
@@ -43,20 +45,26 @@ deleteWineAssociations()
 	sed -i '/FileOpenAssociations/d;/AppName/d;/DesktopFile/d;/Associations/d;/MimeType/d;/OpenWithIcon/d;/ProgID/d' $WINEPREFIX/user.reg
 }
 
+#for debug purpose only
+getShaderCount()
+{
+	conf_folder=$HOME/.config/wine_helper
+	prefix=$(basename $WINEPREFIX)
+	
+	ps=$(grep "ps_[0-9]" $WINEPREFIX/user.reg | wc -l)
+	vs=$(grep "vs_[0-9]" $WINEPREFIX/user.reg | wc -l)
+	
+	echo "Pixel Shaders: $ps + $(($ps - $(awk '/'$prefix'/ {print $2}' $conf_folder/shaders))) new"
+	echo "Vertix Shaders: $vs + $(($vs - $(awk '/'$prefix'/ {print $3}' $conf_folder/shaders))) new"
+	
+	echo "$prefix $ps $vs" > $conf_folder/shaders
+}
+
 for i in "$@"; do
 	case $i in
-		-wvs=*|--wine-ver-set=*)
-		wine_path=$dir"wine_${i#*=}/bin/"
-		shift
-		;;
 		
 		-p=*|--prefix=*)
 		WINEPREFIX=$wine_prefixes_dir"${i#*=}"
-		shift
-		;;
-		
-		-a=*|--arch=*)
-		ARCH="${i#*=}"
 		shift
 		;;
 		
@@ -67,6 +75,8 @@ for i in "$@"; do
 	esac
 done
 
+[ -z $WINEPREFIX ] && WINEPREFIX=$wine_prefixes_dir$default_prefix
+
 if [ "$1" = "--sandbox" ] || [ "$1" = "-s" ]; then
 	sandboxing
 	exit 0
@@ -76,7 +86,13 @@ elif [ "$1" = "--delete-trash" ]; then
 elif [ "$1" = "--delete-junk-associations" ]; then
 	deleteWineAssociations
 	exit 0
+elif [ "$1" = "--get-shader-count" ]; then
+	getShaderCount
+	exit 0
 elif [ "$1" = "-h" ]; then
+	help
+	exit 0
+else
 	help
 	exit 0
 fi

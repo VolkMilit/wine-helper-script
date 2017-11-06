@@ -7,7 +7,7 @@ conf=$HOME/.config/wine_helper/settings.conf
 
 help()
 {
-	wine=`basename $0`
+	wine=$(basename $0)
 	
 	[ ! -r /usr/local/share/wine_helper/help_$wine ] && echo "There is no help page for $wine." && exit 0
 	
@@ -17,7 +17,7 @@ Usage: $wine [ARGUMENTS...] PROGRAM [PROGRAM ARGUMENTS...]
 $(column -tx -s'%' /usr/local/share/wine_helper/help_$wine)
 
 This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY (c) 2015-`date +'%Y'` Volk_Milit (aka Ja'Virr-Dar)"
+but WITHOUT ANY WARRANTY (c) 2015-$(date +'%Y') Volk_Milit (aka Ja'Virr-Dar)"
 }
 
 die()

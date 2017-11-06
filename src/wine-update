@@ -21,12 +21,12 @@ fetchMachine()
 
 fetchSystem()
 {	
-	local sys=$(uname -s)
+	sys=$(uname -s)
 	
-	if [ $sys = "GNU" ]; then
+	if [ "$sys" = "GNU" ]; then
 		echo "Hurd is not supported."
 		exit 1
-	elif [ $sys = "SunOS" ]; then
+	elif [ "$sys" = "SunOS" ]; then
 		echo "Solaris\OpenIndiana\SmartOS is not supported."
 		exit 1
 	fi
@@ -42,7 +42,7 @@ getPOLWine()
 			echo "Error getting Play On Linux wine binaries. First or second parametrs is empty. Must be: $0 wine[-staing]-1.5.26 [amd64]"
 		fi
 	
-		GET="https://www.playonlinux.com/wine/binaries/linux-"$1"/"PlayOnLinux-$2-linux-$1".pol"
+		GET="https://www.playonlinux.com/wine/binaries/linux-$1/PlayOnLinux-$2-linux-$1.pol"
 		wget -qO - $GET > /tmp/wine.tar.gz
 		cd /tmp
 		tar xvf wine.tar.gz
@@ -55,7 +55,7 @@ getPOLWine()
 # https://dl.winehq.org/wine-builds/debian/pool/main/
 getStagingWine()
 {
-	if [ ! $(which sudo) ] && [ $(ls -ld $dir | cut -d ' ' -f3)!=$(whoami) ]; then
+	if [ ! $(which sudo) ] && [ "$(ls -ld $dir | cut -d ' ' -f3)" != "$(whoami)" ]; then
 		echo "Error: $dir allow write root only users and you don't have [sudo] installed in your system. Please, change destanation folder."
 		exit 0
 	fi
@@ -68,7 +68,7 @@ getStagingWine()
 	
 	#black magic starts here
 	dev=$(echo $development | sed 's/\./\\./g') #workaround grep can't filter someting with dot symbol
-	removeTrash=`html2text -nobs /tmp/wine-staging.html | grep "$dev" | sed '/wine-staging/!d;/'$release'/!d;/dbg/d;/dev/d;/compat/d' | cut -d " " -f 8`
+	removeTrash=$(html2text -nobs /tmp/wine-staging.html | grep "$dev" | sed '/wine-staging/!d;/'$release'/!d;/dbg/d;/dev/d;/compat/d' | cut -d " " -f 8)
 	
 	wineVersionAmd64=$(echo $removeTrash | cut -d " " -f 3)
 	wineVersionAmd64Libs=$(echo $removeTrash | cut -d " " -f 1)
@@ -132,7 +132,7 @@ fetchStagingNews()
 	
 	echo " Done!"
 	
-	while read LINE; do 
+	while read -r LINE; do 
 		[ "$LINE" = "Read_more" ] && break
 		echo $LINE
 	done < /tmp/wine_staging_news | sed '1,20d'

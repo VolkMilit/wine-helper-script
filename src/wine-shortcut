@@ -2,7 +2,7 @@
 
 . /usr/local/lib/wine_helper/wine_helper_global.shlib
 
-pwd=`echo ${PWD} | sed -e 's/.*/"&"/g'`
+pwd=$(echo ${PWD} | sed -e 's/.*/"&"/g')
 
 if [ "$1" = "-a" ] || [ "$1" = "--auto" ]; then
 	ind=0
@@ -15,16 +15,18 @@ if [ "$1" = "-a" ] || [ "$1" = "--auto" ]; then
 		exe=$2
 	fi
 	
-	tmp=`echo $pwd/$2 | sed 's|.*/||'`
-	name=`basename "$(echo $pwd/$tmp | sed 's/\/'$tmp'//g;s/"//g')"`
+	tmp=$(echo $pwd/$2 | sed 's|.*/||')
+	name=$(basename "$(echo $pwd/$tmp | sed 's/\/'$tmp'//g;s/"//g')")
 	prefix=".wine_tesv"
 	
 	if [ -f "${PWD}/icon.ico" ]; then
 		convert "${PWD}/icon.ico" "${PWD}/icon.png"
 		icon=${PWD}/icon.png
-	else
-		convert "${PWD}/$(ls | awk '/ico/')" "${PWD}/$(ls | awk 'gsub(".ico", "")').png"
-		icon=${PWD}/$(ls | awk 'gsub(".ico", "")').png
+	elif [ "$(ls | grep -i ico)" != "" ]; then
+		ii=$(ls | grep -i ico | head -n1)
+		iipng=$(echo $ii | sed 's/.ico/.png/')
+		convert "${PWD}/$ii" "${PWD}/$iipng"
+		icon=${PWD}/$iipng
 	fi
 elif [ "$1" = "" ]; then
 	help
@@ -65,7 +67,7 @@ else
 	done
 fi
 
-file="$HOME/.local/share/applications/Games/"`echo $name | sed -e 's/ /_/g'`".desktop"
+file="$HOME/.local/share/applications/Games/$(echo $name | sed -e 's/ /_/g').desktop"
 
 touch $file
 
