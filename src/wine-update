@@ -1,10 +1,12 @@
 #!/bin/sh
 
+#. /usr/local/lib/wine_helper/wine_helper_global.shlib
+. libs/wine_helper_global.shlib
+
 repo="https://dl.winehq.org/wine-builds/debian/pool/main/"
 dir="/opt/"
-release=$(lsb_release -cs)
+release=$(release_helper)
 
-. /usr/local/lib/wine_helper/wine_helper_global.shlib
 [ -f $conf ] && . $conf
 
 wine_ver_get=$(ls $dir | sort --version-sort | sed '/wine/!d;$!d') # get the lasted version of wine in dir, e.g. wine_1.8.0

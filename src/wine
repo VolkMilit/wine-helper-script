@@ -76,7 +76,7 @@ done
 [ -z "$WINEPREFIX" ] && WINEPREFIX=$wine_prefixes_dir$default_prefix
 [ -z "$sm" ] && sm=0
 [ -z "$wc" ] && wc=0
-[ -z "$NORUNTIME" ] && RUNTIME=$runtime
+#[ -z "$NORUNTIME" ] && RUNTIME=$runtime
 
 prefix=$(awk -F "=" '/#arch/ {print $2}' $WINEPREFIX/user.reg)
 
@@ -93,18 +93,19 @@ if [ -z "$WINEDEBUG" ]; then
 		echo "Use 64-bit wine binary"; 
 	fi
 	
-	echo "Use \"$RUNTIME\" command to provide runtime"
-	echo "Warning, missing libs are: " $($wine_path$ww --check-libs | awk '/missing/ {gsub(":",""); print $1}')
+	echo "Use \"$runtime\" command to provide runtime"
+	echo "Warning, missing libs are: " $($runtime $wine_path$ww --check-libs | awk '/missing/ {gsub(":",""); print $1}')
 fi
 
 if [ "$sandboxing" = "true" ]; then
-	WINEPREFIX=$WINEPREFIX $wine_path$ww wineboot
+	WINEPREFIX=$WINEPREFIX $runtime $wine_path$ww wineboot
 	WINEPREFIX=$WINEPREFIX wine-tools -s
 fi
 
 wine_ver=$(echo $wine_path | awk -F'wine_' '{gsub("/bin/",""); print $2}')
 echo "Running wine verion $wine_ver" 
-STAGING_SHARED_MEMORY=$sm STAGING_WRITE_COPY=$wc WINEPREFIX=$WINEPREFIX $RUNTIME $wine_path$ww $1
+STAGING_SHARED_MEMORY=$sm STAGING_WRITE_COPY=$wc WINEPREFIX=$WINEPREFIX $runtime $wine_path$ww $1
 
 CURRENT_RESOLUTION="$(xrandr -q | awk -F'current' -F',' 'NR==1 {gsub("( |current)","");print $2}')"
-[ "$CURRENT_RESOLUTION" != "$RESOLUTION" ] && xrandr -s $RESOLUTION
+#[ "$CURRENT_RESOLUTION" != "$RESOLUTION" ] && xrandr -s $RESOLUTION
+xrandr -s $RESOLUTION

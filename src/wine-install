@@ -47,10 +47,10 @@ done
 [ -z "$NORUNTIME" ] && RUNTIME=$runtime
 prefix=`awk -F "=" '/#arch/ {print $2}' $WINEPREFIX/user.reg`
 
-if [ ! -z "$ARCH" ] || [ "$prefix" = "win32" ]; then
+#if [ ! -z "$ARCH" ] || [ "$prefix" = "win32" ]; then
 	ww="wine"
-else
-	ww="wine64"
-fi
+#else
+#	ww="wine64"
+#fi
 
 WINEPREFIX=$WINEPREFIX WINE=$wine_path$ww WINESERVER=$wine_path"wineserver" $RUNTIME winetricks $1

@@ -14,7 +14,7 @@ Version: $VER
 Section: otherosfs
 Architecture: all
 Installed-Size: 29.1K
-Depends: bash | sh | dash, awk, sed, wget, curl, lsb-release, html2text
+Depends: bash | sh | dash, awk, sed, wget, curl, html2text
 Suggests: wine | wine-staging, winetricks
 Priority: optional
 Maintainer: Volk_Milit <javirrdar@gmail.com>
