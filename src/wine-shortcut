@@ -122,7 +122,7 @@ cat > $file <<EOF
 [Desktop Entry]
 Encoding=UTF-8
 Name=$name
-Exec=sh -c 'cd ${pwd}; WINEDEBUG=-all wine -p=$prefix $exe'
+Exec=sh -c 'cd ${PWD}; WINEDEBUG=-all wine -p=$prefix $exe'
 Icon=$icon
 Categories=Game;
 
