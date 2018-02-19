@@ -2,32 +2,79 @@
 
 . /usr/local/lib/wine_helper/wine_helper_global.shlib
 
+# horrible hacks starts here
+
 pwd=$(echo ${PWD} | sed -e 's/.*/"&"/g')
 
 if [ "$1" = "-a" ] || [ "$1" = "--auto" ]; then
 	ind=0
-	exe_list=$(ls -l | egrep "*-*-x" | cut -d " " -f 11)
+	num=0
+	prefix=".wine_tesv" #need to be configurable
+	
+	#Yeah, I dunno.
+	#for i in $exe_list
+	#mess up files with spaces, so I write this horrible hack.
+	find . -maxdepth 1 -type f -name "*.exe" | sed 's/\.\///g' > /tmp/wine_exe
 	
 	if [ -z $2 ]; then
-		ask "You did't specify exe path. Choose one of these:\n"
-		for i in $F; do echo $((ind=ind+1)) $i; done
+		echo "You did't specify exe path. Choose one of these:"
+		
+		while read LINE; do 
+			echo $((ind=ind+1)) $LINE; 
+		done < /tmp/wine_exe
+		
+		read num
+		exe=$(awk 'NR=='$num < /tmp/wine_exe)
+		rm /tmp/wine_exe
 	else
 		exe=$2
 	fi
 	
-	tmp=$(echo $pwd/$2 | sed 's|.*/||')
-	name=$(basename "$(echo $pwd/$tmp | sed 's/\/'$tmp'//g;s/"//g')")
-	prefix=".wine_tesv"
+	name=$(basename "$(echo $pwd)" | sed 's/"//g')
 	
-	if [ -f "${PWD}/icon.ico" ]; then
-		convert "${PWD}/icon.ico" "${PWD}/icon.png"
-		icon=${PWD}/icon.png
-	elif [ "$(ls | grep -i ico)" != "" ]; then
-		ii=$(ls | grep -i ico | head -n1)
-		iipng=$(echo $ii | sed 's/.ico/.png/')
-		convert "${PWD}/$ii" "${PWD}/$iipng"
-		icon=${PWD}/$iipng
+	#So, I need to explain what happens here:
+	#by default many engines keep exe files in subdirs, and I get name of the game from base dir.
+	#For example Dark Souls I and II and Unreal Engine games keeps their files in DATA, Game and System subdirectories
+	#to avoid this we need to cd on one level up.
+	#It's a hack, yep. I don't know hot to do it in "nice" way with POSIX sh. Of course I could parse $pwd, but, naah, too hard.
+	if [ "$name" = "Game" ] || [ "$name" = "DATA" ] || [ "$name" = "System" ]; then
+		_pwd=$pwd
+		cd ..
+		pwd=$(echo ${PWD} | sed -e 's/.*/"&"/g')
+		name=$(basename "$(echo $pwd)" | sed 's/"//g')
+		pwd=$_pwd
 	fi
+	
+	
+	#Not all but many GOG games doesn't have valuble icon of game. I don't like to install ink files in menu, 
+	#so there is no icon for me. But, lucky me, PE executable have manifest, that contains icon.
+	#We just need 7z to extract PE.
+	#Ether way, we can search for icon in game directory and\or in $HOME/.local/share/icons/hicolor/32x32/apps
+	
+	icon=$(find $HOME/.local/share/icons/hicolor/32x32/apps -name "*$(echo $exe | sed 's/.exe//g').0.png")
+	
+	if [ -f "$icon" ]; then
+		if [ -f "${PWD}/icon.ico" ]; then
+			convert "${PWD}/icon.ico" "${PWD}/icon.png"
+			icon=${PWD}/icon.png
+		elif [ "$(ls | grep -i ico)" != "" ]; then
+			ii=$(ls | grep -i ico | head -n1)
+			iipng=$(echo $ii | sed 's/.ico/.png/')
+			convert "${PWD}/$ii" "${PWD}/$iipng"
+			icon=${PWD}/$iipng
+		else
+			mkdir /tmp/wine-exe
+			cp $exe /tmp/wine-exe
+			cd /tmp/wine-exe
+			7z x $exe
+			cd $(find . -name "ICON")
+			convert $(ls -1 | sort -nu | tail -1) icon.png
+			cp icon.png $pwd
+			cd ..
+			rm -rf /tmp/wine-exe
+		fi
+	fi
+		
 elif [ "$1" = "" ]; then
 	help
 	exit 0
@@ -67,7 +114,7 @@ else
 	done
 fi
 
-file="$HOME/.local/share/applications/Games/$(echo $name | sed -e 's/ /_/g').desktop"
+file="$HOME/.local/share/applications/$(echo $name | sed -e 's/ /_/g').desktop"
 
 touch $file
 
@@ -75,7 +122,7 @@ cat > $file <<EOF
 [Desktop Entry]
 Encoding=UTF-8
 Name=$name
-Exec=sh -c 'cd ${pwd}; wine -p=$prefix $exe'
+Exec=sh -c 'cd ${pwd}; WINEDEBUG=-all wine -p=$prefix $exe'
 Icon=$icon
 Categories=Game;
 
