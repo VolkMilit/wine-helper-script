@@ -53,7 +53,7 @@ if [ "$1" = "-a" ] || [ "$1" = "--auto" ]; then
 	
 	icon=$(find $HOME/.local/share/icons/hicolor/32x32/apps -name "*$(echo $exe | sed 's/.exe//g').0.png")
 	
-	if [ -f "$icon" ]; then
+	if [ -z "$icon" ]; then
 		if [ -f "${PWD}/icon.ico" ]; then
 			convert "${PWD}/icon.ico" "${PWD}/icon.png"
 			icon=${PWD}/icon.png
@@ -63,15 +63,17 @@ if [ "$1" = "-a" ] || [ "$1" = "--auto" ]; then
 			convert "${PWD}/$ii" "${PWD}/$iipng"
 			icon=${PWD}/$iipng
 		else
-			mkdir /tmp/wine-exe
-			cp $exe /tmp/wine-exe
-			cd /tmp/wine-exe
-			7z x $exe
+			#yes, there is another horrible hack to bypass fucking spaces! FUCK SPACES!
+			mkdir wine-exe
+			cp $exe wine-exe
+			cd wine-exe
+			7z x $exe -y
+			count=$(find . -name "ICON" | sed 's/[a-zA-Z.-]//g' | wc -c)
 			cd $(find . -name "ICON")
 			convert $(ls -1 | sort -nu | tail -1) icon.png
-			cp icon.png $pwd
-			cd ..
-			rm -rf /tmp/wine-exe
+			for i in $(seq 1 $count); do cd ..; done #because that stupid cd can't cd in $pwd, but, well, it still can acess ${PWD}
+			cp $(find . -name "ICON")/icon.png "${PWD}"
+			rm -rf wine-exe
 		fi
 	fi
 		
