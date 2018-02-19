@@ -74,6 +74,7 @@ if [ "$1" = "-a" ] || [ "$1" = "--auto" ]; then
 			for i in $(seq 1 $count); do cd ..; done #because that stupid cd can't cd in $pwd, but, well, it still can acess ${PWD}
 			cp $(find . -name "ICON")/icon.png "${PWD}"
 			rm -rf wine-exe
+			icon="${PWD}/icon.png"
 		fi
 	fi
 		
