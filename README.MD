@@ -45,12 +45,15 @@ Need for all binary:
 
 Need only for wine-install and wine-update
 - wget >= 1.xx
-- curl (any)
-- html2text (any)
+- curl
+- html2text
+
+Need for wine-shortcut
+- p7zip-full
 
 Sugession:
-- firejail (any)
-- winetricks (any)
+- firejail
+- winetricks
 
 ## License
 WTFPL v2
