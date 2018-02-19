@@ -4,7 +4,7 @@
 
 # horrible hacks starts here
 
-pwd=$(echo ${PWD} | sed -e 's/.*/"&"/g')
+#pwd=$(echo ${PWD} | sed -e 's/.*/"&"/g')
 
 if [ "$1" = "-a" ] || [ "$1" = "--auto" ]; then
 	ind=0
@@ -30,7 +30,8 @@ if [ "$1" = "-a" ] || [ "$1" = "--auto" ]; then
 		exe=$2
 	fi
 	
-	name=$(basename "$(echo $pwd)" | sed 's/"//g')
+	name=$(basename "${PWD}")
+	_pwd="${PWD}"
 	
 	#So, I need to explain what happens here:
 	#by default many engines keep exe files in subdirs, and I get name of the game from base dir.
@@ -38,11 +39,9 @@ if [ "$1" = "-a" ] || [ "$1" = "--auto" ]; then
 	#to avoid this we need to cd on one level up.
 	#It's a hack, yep. I don't know hot to do it in "nice" way with POSIX sh. Of course I could parse $pwd, but, naah, too hard.
 	if [ "$name" = "Game" ] || [ "$name" = "DATA" ] || [ "$name" = "System" ]; then
-		_pwd=$pwd
 		cd ..
-		pwd=$(echo ${PWD} | sed -e 's/.*/"&"/g')
-		name=$(basename "$(echo $pwd)" | sed 's/"//g')
-		pwd=$_pwd
+		name=$(basename "${PWD}")
+		cd "${_pwd}"
 	fi
 	
 	
@@ -63,15 +62,13 @@ if [ "$1" = "-a" ] || [ "$1" = "--auto" ]; then
 			convert "${PWD}/$ii" "${PWD}/$iipng"
 			icon=${PWD}/$iipng
 		else
-			#yes, there is another horrible hack to bypass fucking spaces! FUCK SPACES!
 			mkdir wine-exe
 			cp $exe wine-exe
 			cd wine-exe
 			7z x $exe -y
-			count=$(find . -name "ICON" | sed 's/[a-zA-Z.-]//g' | wc -c)
 			cd $(find . -name "ICON")
 			convert $(ls -1 | sort -nu | tail -1) icon.png
-			for i in $(seq 1 $count); do cd ..; done #because that stupid cd can't cd in $pwd, but, well, it still can acess ${PWD}
+			cd "${_pwd}"
 			cp $(find . -name "ICON")/icon.png "${PWD}"
 			rm -rf wine-exe
 			icon="${PWD}/icon.png"
