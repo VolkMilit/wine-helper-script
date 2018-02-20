@@ -4,14 +4,14 @@
 
 runtime="$HOME/.steam/runtime/run.sh"
 RESOLUTION="$(xrandr -q | awk -F'current' -F',' 'NR==1 {gsub("( |current)","");print $2}')" # some fun staff from Kron
-dir="/opt/"
+dir="/opt"
 default_prefix=".wine64"
 wine_prefixes_dir="$HOME/.local/share/wine_prefix/"
 
 [ -f $conf ] && . $conf
 
 wine_ver_get=$(ls $dir | sort --version-sort | sed '/wine/!d;$!d') # get the lasted version of wine in dir, e.g. wine_1.8.0
-wine_path=$dir$wine_ver_get"/bin/"
+wine_path=$dir/$wine_ver_get/bin
 
 if [ "$1" = "-v" ]; then
 	echo "WINE helper version is $VER"
@@ -27,12 +27,12 @@ fi
 for i in "$@"; do
 	case $i in
 		-wvs=*|--wine-ver-set=*)
-		wine_path=$dir"wine_${i#*=}/bin/"
+		wine_path=$dir"wine_${i#*=}/bin"
 		shift
 		;;
 		
 		-np|--new-prefix)
-		WINEPREFIX=$WINEPREFIX $wine_path$ww wineboot
+		WINEPREFIX=$WINEPREFIX $wine_path/$ww wineboot
 		shift
 		;;
 		
@@ -47,7 +47,7 @@ for i in "$@"; do
 		;;
 		
 		-k|--kill)
-		WINEPREFIX=$WINEPREFIX ${wine_path}wineserver -k
+		WINEPREFIX=$WINEPREFIX $wine_path/wineserver -k
 		shift
 		;;
 		
@@ -62,7 +62,7 @@ for i in "$@"; do
 		;;
 		
 		-d|-debug)
-		WINEDEBUG=-all
+		export WINEDEBUG=-all
 		shift
 		;;
 		
@@ -94,17 +94,22 @@ if [ -z "$WINEDEBUG" ]; then
 	fi
 	
 	echo "Use \"$runtime\" command to provide runtime"
-	echo "Warning, missing libs are: " $($runtime $wine_path$ww --check-libs | awk '/missing/ {gsub(":",""); print $1}')
+	echo "Warning, missing libs are: " $($runtime $wine_path/$ww --check-libs | awk '/missing/ {gsub(":",""); print $1}')
 fi
 
 if [ "$sandboxing" = "true" ]; then
-	WINEPREFIX=$WINEPREFIX $runtime $wine_path$ww wineboot
+	WINEPREFIX=$WINEPREFIX $runtime $wine_path/$ww wineboot
 	WINEPREFIX=$WINEPREFIX wine-tools -s
 fi
 
 wine_ver=$(echo $wine_path | awk -F'wine_' '{gsub("/bin/",""); print $2}')
-echo "Running wine verion $wine_ver" 
-STAGING_SHARED_MEMORY=$sm STAGING_WRITE_COPY=$wc WINEPREFIX=$WINEPREFIX $runtime $wine_path$ww $1
+echo "Running wine verion $wine_ver"
+
+export STAGING_SHARED_MEMORY=$sm
+export STAGING_WRITE_COPY=$wc 
+export WINEPREFIX=$WINEPREFIX 
+
+$runtime $wine_path/$ww $1
 
 CURRENT_RESOLUTION="$(xrandr -q | awk -F'current' -F',' 'NR==1 {gsub("( |current)","");print $2}')"
 #[ "$CURRENT_RESOLUTION" != "$RESOLUTION" ] && xrandr -s $RESOLUTION
