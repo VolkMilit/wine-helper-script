@@ -1,7 +1,6 @@
 #!/bin/sh
 
-#. /usr/local/lib/wine_helper/wine_helper_global.shlib
-. libs/wine_helper_global.shlib
+. /usr/local/lib/wine_helper/wine_helper_global.shlib
 
 repo="https://dl.winehq.org/wine-builds/debian/pool/main/"
 dir="/opt/"
@@ -144,6 +143,7 @@ fetchStagingNews()
 
 askStagingWine()
 {
+	stagingStab
 	echo -n "Parsing page, be patient..."
 	# get wine-hq page to get current wine versions
 	wget -qO - $repo > /tmp/wine-staging.html
@@ -163,6 +163,13 @@ askStagingWine()
 			getStagingWine
 		fi
 	fi
+}
+
+stagingStab()
+{
+	echo "Ok, so, wine-staging is dead (see https://www.wine-staging.com/news/2018-02-17-future-wine-staging.html), and news isn't there anymore. But we has a fork (https://github.com/wine-staging/wine-staging). I can't parse the page and get lastes changelog from page. And by a state of 20 february 2018 there is no new packages for Debian in repo. I will remove this stab when new release appears in repo, and\or when site will be active again."
+	echo "Exit now..."
+	exit 0
 }
 
 fetchMachine
