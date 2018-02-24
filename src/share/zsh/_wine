@@ -9,7 +9,6 @@ _wine() {
     '--version:Output version information and exit'
     '--patches:Output patch information and exit'
     '--check-libs:Checks if shared libs are installed'
-    '-n|--new-prefix:New clear wine prefix'
     '-p|--prefix:Set wine prefix'
     '-a|--arch:Set wine arch'
     '-wvs|--wine-version-set:Set specific wine version to use'

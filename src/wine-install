@@ -1,13 +1,7 @@
 #!/bin/sh
 
 . /usr/local/lib/wine_helper/wine_helper_global.shlib
-
-runtime="$HOME/.steam/runtime/run.sh"
-dir="/opt/"
-default_prefix=".wine64"
-wine_prefixes_dir="$HOME/.local/share/wine_prefix/"
-
-[ -f $conf ] && . $conf
+. $conf
 
 wine_ver_get=$(ls $dir | sort --version-sort | sed '/wine/!d;$!d') # get the lasted version of wine in dir, e.g. wine_1.8.0
 wine_path=$dir$wine_ver_get"/bin/"

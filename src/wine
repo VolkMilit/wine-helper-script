@@ -2,13 +2,8 @@
 
 . /usr/local/lib/wine_helper/wine_helper_global.shlib
 
-runtime="$HOME/.steam/runtime/run.sh"
 RESOLUTION="$(xrandr -q | awk -F'current' -F',' 'NR==1 {gsub("( |current)","");print $2}')" # some fun staff from Kron
-dir="/opt"
-default_prefix=".wine64"
-wine_prefixes_dir="$HOME/.local/share/wine_prefix/"
-
-[ -f $conf ] && . $conf
+. $conf
 
 wine_ver_get=$(ls $dir | sort --version-sort | sed '/wine/!d;$!d') # get the lasted version of wine in dir, e.g. wine_1.8.0
 wine_path=$dir/$wine_ver_get/bin
@@ -31,13 +26,8 @@ for i in "$@"; do
 		shift
 		;;
 		
-		-np|--new-prefix)
-		WINEPREFIX=$WINEPREFIX $wine_path/$ww wineboot
-		shift
-		;;
-		
 		-p=*|--prefix=*)
-		WINEPREFIX=$wine_prefixes_dir"${i#*=}"
+		WINEPREFIX=$wine_prefixes_dir/"${i#*=}"
 		shift
 		;;
 		
@@ -62,7 +52,7 @@ for i in "$@"; do
 		;;
 		
 		-d|-debug)
-		export WINEDEBUG=-all
+		WINEDEBUG=-all
 		shift
 		;;
 		
@@ -102,12 +92,14 @@ if [ "$sandboxing" = "true" ]; then
 	WINEPREFIX=$WINEPREFIX wine-tools -s
 fi
 
-wine_ver=$(echo $wine_path | awk -F'wine_' '{gsub("/bin/",""); print $2}')
+wine_ver=$(echo $wine_path | awk -F'wine_' '{gsub("/bin",""); print $2}')
 echo "Running wine verion $wine_ver"
 
 export STAGING_SHARED_MEMORY=$sm
 export STAGING_WRITE_COPY=$wc 
-export WINEPREFIX=$WINEPREFIX 
+export WINEPREFIX=$WINEPREFIX
+export ARCH=$ARCH
+export WINEDEBUG=$WINEDEBUG
 
 $runtime $wine_path/$ww $1
 

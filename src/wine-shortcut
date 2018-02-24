@@ -4,8 +4,6 @@
 
 # horrible hacks starts here
 
-#pwd=$(echo ${PWD} | sed -e 's/.*/"&"/g')
-
 if [ "$1" = "-a" ] || [ "$1" = "--auto" ]; then
 	ind=0
 	num=0
@@ -53,7 +51,9 @@ if [ "$1" = "-a" ] || [ "$1" = "--auto" ]; then
 	icon=$(find $HOME/.local/share/icons/hicolor/32x32/apps -name "*$(echo $exe | sed 's/.exe//g').0.png")
 	
 	if [ -z "$icon" ]; then
-		if [ -f "${PWD}/icon.ico" ]; then
+		if [ -f "${PWD}/icon.png" ]; then #just in case
+			icon=${PWD}/icon.png
+		elif [ -f "${PWD}/icon.ico" ]; then
 			convert "${PWD}/icon.ico" "${PWD}/icon.png"
 			icon=${PWD}/icon.png
 		elif [ "$(ls | grep -i ico)" != "" ]; then
@@ -114,6 +114,14 @@ else
 	done
 fi
 
+#Unity specific, better works in wine
+options=""
+if [ -d "${PWD}/$(echo $exe | sed 's/.exe//g')_Data" ]; then
+	[ "$unity_opengl" = "true" ] && options="-force-glcore"
+	[ "$unity_d3d11_single" = "true" ] && options="-force-d3d11"
+	[ "$unity_d3d11" = "true" ] && options="-force-d3d11-no-singlethreaded"
+fi
+
 file="$HOME/.local/share/applications/$(echo $name | sed -e 's/ /_/g').desktop"
 
 touch $file
@@ -122,7 +130,7 @@ cat > $file <<EOF
 [Desktop Entry]
 Encoding=UTF-8
 Name=$name
-Exec=sh -c 'cd "${PWD}"; WINEDEBUG=-all wine -p=$prefix $exe'
+Exec=sh -c 'cd "${PWD}"; wine -d -p=$prefix $exe $options'
 Icon=$icon
 Categories=Game;
 

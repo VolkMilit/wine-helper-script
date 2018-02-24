@@ -1,11 +1,7 @@
 #!/bin/sh
 
 . /usr/local/lib/wine_helper/wine_helper_global.shlib
-
-wine_prefixes_dir="$HOME/.local/share/wine_prefix/"
-default_prefix=".wine64"
-
-[ -f $conf ] && . $conf
+. $conf
 
 sandboxing()
 {
@@ -46,6 +42,7 @@ deleteWineAssociations()
 }
 
 #for debug purpose only
+#only works in staging with this patch: https://dev.wine-staging.com/patches/204/
 getShaderCount()
 {
 	conf_folder=$HOME/.config/wine_helper

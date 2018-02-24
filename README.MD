@@ -1,12 +1,7 @@
-# wine script v1.10.1
+# wine script v1.11.0
 
 Just a little sh scripts, debian package and a bash\zsh compiletion module for my personal use. Maybe someone will find it useful.
 I position this as Play On Linux without bloatnes and dependencies like Python and GTK, because I don't need this. Actually it doesn't have some POL futures, but who cares, when you may use standart wine tools? I'm mostly follow [http://suckless.org/philosophy](Suckless philosophy).
-
-## Changes
-- Now using only futures from sh, so it can be run on most *NIX system. Anyway, I rarely used something from bash itself
-- Separate binary and help files
-- Carry out some repetitive functionality to lib
 
 ## wine
 - Main binary, that actually running right version of wine, prefix and arch
@@ -18,13 +13,17 @@ I position this as Play On Linux without bloatnes and dependencies like Python a
 - Delete all reference to $HOME directory automaticly, if this option is enable in settings.conf
 
 ## wine-update
+- Downloading and install any version from POL (Including Linux, FreeBSD, Darwin all x86\x86_64) (TODO)
+
+N/A 20 february 2018 ded:
 - Downloading and install lastes wine staging (Debian-based\Ubuntu-based\Mint-based only)
 - Fetching lastes changelog for staging
-- Downloading and install any version from POL (Including Linux, FreeBSD, Darwin all x86\x86_64) (TODO)
+
 
 ## wine-shortcut
 - Create shortcut with wine exec. Like:
 cd /folder_with_exe; wine -p=prefix exe
+- Detect unity game and add render option (can be configured through settings.conf)
 
 ## wine-install
 - Call winetricks with right wine and prefix
@@ -35,7 +34,7 @@ Various tools to make life easier:
 - Sandboxing prefix by delete all links to $HOME without needed to using winetricks
 
 ## Configure file
-Configure file must be locate in $HOME/.config/wine_helper/settings.conf. In repo root directory is an example settings.conf. File well documented.
+First you need to copy settings.conf from /usr/local/etc/wine_helper to $HOME/.config/wine_helper/ . Using in-file instructions configure it.
 
 ## Dependings
 Need for all binary:
