@@ -1,11 +1,11 @@
 #!/bin/sh
 
 . /usr/local/lib/wine_helper/wine_helper_global.shlib
-
-RESOLUTION="$(xrandr -q | awk -F'current' -F',' 'NR==1 {gsub("( |current)","");print $2}')" # some fun staff from Kron
 . $conf
 
-wine_ver_get=$(ls $dir | sort --version-sort | sed '/wine/!d;$!d') # get the lasted version of wine in dir, e.g. wine_1.8.0
+RESOLUTION="$(xrandr -q | awk -F'current' -F',' 'NR==1 {gsub("( |current)","");print $2}')" # some fun staff from Kron
+
+wine_ver_get=$(ls $dir | sort -n | sed '/wine/!d;$!d') # get the lasted version of wine in dir, e.g. wine_1.8.0
 wine_path=$dir/$wine_ver_get/bin
 
 if [ "$1" = "-v" ]; then
@@ -56,17 +56,58 @@ for i in "$@"; do
 		shift
 		;;
 		
-		*)
-		#help
-		#exit 0
+		-desktop)
+		desktop=$RESOLUTION
+		shift
+		;;
+		
+		-desktop=*)
+		desktop="${i#*=}"
+		shift
+		;;
+		
+		-noinet)
+		shift
+		;;
+		
+		-fps)
+		checkfps=1
+		shift
+		;;
+		
+		-csmt=*)
+		csmt="${i#*=}"
+		shift
 		;;
 	esac
 done
 
+if [ ! -z "$checkfps" ]; then
+	if [ "$checkfps" = "1" ]; then
+		if [ -z $(which glxosd) ]; then
+			echo "You need to install GLXOSD package or build it by yourself."
+			fps=""
+		else
+			fps="glxosd"
+		fi
+	fi
+fi
+
+if [ ! -z "$desktop" ]; then
+	explorer="explorer /desktop=$(sed -i 's/.exe//g' $exe),$desktop"
+fi
+
+#if [ ! -z "$csmt" ]; then
+	
+	
+	#if [ "$csmt" = "0" ]; then
+	#else
+	#fi
+#fi
+
 [ -z "$WINEPREFIX" ] && WINEPREFIX=$wine_prefixes_dir$default_prefix
 [ -z "$sm" ] && sm=0
 [ -z "$wc" ] && wc=0
-#[ -z "$NORUNTIME" ] && RUNTIME=$runtime
 
 prefix=$(awk -F "=" '/#arch/ {print $2}' $WINEPREFIX/user.reg)
 
@@ -75,6 +116,12 @@ if [ ! -z "$ARCH" ] || [ "$prefix" = "win32" ]; then
 else
 	ww="wine64"
 fi
+
+export STAGING_SHARED_MEMORY=$sm
+export STAGING_WRITE_COPY=$wc 
+export WINEPREFIX=$WINEPREFIX
+export ARCH=$ARCH
+export WINEDEBUG=$WINEDEBUG
 
 if [ -z "$WINEDEBUG" ]; then
 	if [ "$ww" = "wine" ]; then
@@ -95,14 +142,7 @@ fi
 wine_ver=$(echo $wine_path | awk -F'wine_' '{gsub("/bin",""); print $2}')
 echo "Running wine verion $wine_ver"
 
-export STAGING_SHARED_MEMORY=$sm
-export STAGING_WRITE_COPY=$wc 
-export WINEPREFIX=$WINEPREFIX
-export ARCH=$ARCH
-export WINEDEBUG=$WINEDEBUG
-
-$runtime $wine_path/$ww $1
+$runtime $fps $wine_path/$ww $explorer $@
 
 CURRENT_RESOLUTION="$(xrandr -q | awk -F'current' -F',' 'NR==1 {gsub("( |current)","");print $2}')"
-#[ "$CURRENT_RESOLUTION" != "$RESOLUTION" ] && xrandr -s $RESOLUTION
 xrandr -s $RESOLUTION
