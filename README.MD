@@ -1,16 +1,17 @@
 # wine script v1.11.0
 
 Just a little sh scripts, debian package and a bash\zsh compiletion module for my personal use. Maybe someone will find it useful.
-I position this as Play On Linux without bloatnes and dependencies like Python and GTK, because I don't need this. Actually it doesn't have some POL futures, but who cares, when you may use standart wine tools? I'm mostly follow [http://suckless.org/philosophy](Suckless philosophy).
+I position this as Play On Linux without bloatnes and dependencies like Python and GTK, because I don't need this. Actually it doesn't have some POL futures, but who cares, when you may use standart wine tools?
 
 ## wine
 - Main binary, that actually running right version of wine, prefix and arch
 - Kill wineserver just by typing: $ wine -k
 - Restore native resolution if resolution was change
-- Running application in desktop mode (TODO)
+- Running application in desktop mode
 - Using runtime library (like steam runtime) for not to install all that x86 library in system
 - Cut off internet connection by one option (need firejail) (TODO)
 - Delete all reference to $HOME directory automaticly, if this option is enable in settings.conf
+- Enable or disable CMST for both vanila and staging wine (TODO)
 
 ## wine-update
 - Downloading and install any version from POL (Including Linux, FreeBSD, Darwin all x86\x86_64) (TODO)
@@ -52,7 +53,8 @@ Need for wine-shortcut
 
 Sugession:
 - firejail
-- winetricks
+- winetricks (wine-install can download by himself)
+- glxosd
 
 ## License
 WTFPL v2
