@@ -36,9 +36,15 @@ if [ "$1" = "-a" ] || [ "$1" = "--auto" ]; then
 	#For example Dark Souls I and II and Unreal Engine games keeps their files in DATA, Game and System subdirectories
 	#to avoid this we need to cd on one level up.
 	#It's a hack, yep. I don't know hot to do it in "nice" way with POSIX sh. Of course I could parse $pwd, but, naah, too hard.
-	if [ "$name" = "Game" ] || [ "$name" = "DATA" ] || [ "$name" = "System" ]; then
+	if [ "$name" = "Game" ] || [ "$name" = "DATA" ] || [ "$name" = "System" ] || [ "$name" = "Win32" ]; then
 		cd ..
 		name=$(basename "${PWD}")
+		
+		if [ "$name" = "Binaries" ]; then # special for unreal engine 3.5
+			cd ..
+			name=$(basename "${PWD}")
+		fi
+		
 		cd "${_pwd}"
 	fi
 	
