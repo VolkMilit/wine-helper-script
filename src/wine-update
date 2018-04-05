@@ -3,186 +3,117 @@
 . /usr/local/lib/wine_helper/wine_helper_global.shlib
 . $conf
 
-repo="https://dl.winehq.org/wine-builds/debian/pool/main/"
-release=$(release_helper)
+LIST=/usr/local/share/wine_helper/sources.list
+CACHE=$HOME/.cache/wine
 
-wine_ver_get=$(ls $dir | sort --version-sort | sed '/wine/!d;$!d') # get the lasted version of wine in dir, e.g. wine_1.8.0
-wine_path=$dir$wine_ver_get"/bin/"
-
-fetchMachine()
+getUpdate()
 {
-	mach=$(uname -m)
-	if [ "$mach" = "armv6l" ] || [ "$mach" = "armv7l" ] || [ "$mach" = "ppc" ] || [ "$mach" = "ppc64" ] || [ "$mach" = "mips" ] || [ "$mach" = "sparc64" ]; then
-		echo "arm\ppc\mips\sparc machines are not supporting. Please, use your distribution repository or build wine for yourself."
-		exit 1
+	echo -n "Getting updates..."
+	
+	[ ! -d "$CACHE" ] && mkdir $CACHE
+	cd $CACHE
+	
+	# pol
+	while read -r LINE; do
+		[ "$(echo $LINE | cut -c1)" = "#" ] && continue
+		[ -f "$(basename $LINE)" ] && rm "$(basename $LINE)"
+		curl --silent $LINE -o "$(basename $LINE)"
+	done < $LIST
+	
+	# lutris
+	if [ -f "runners" ]; then
+		cat runners | html2text | cut -d' ' -f1 | grep wine | grep "$(uname -m)" > "runners.lst"		
+		rm runners
+	
+		while read LINE; do 
+			echo "$LINE;$(echo $LINE | sed 's/wine-//g;s/-x86_64.tar.gz//g');" >> runners.lst.bak
+		done < runners.lst
+	
+		rm runners.lst
+		mv runners.lst.bak runners.lst
 	fi
+	
+	echo " Done."
 }
 
-fetchSystem()
-{	
-	sys=$(uname -s)
-	
-	if [ "$sys" = "GNU" ]; then
-		echo "Hurd is not supported."
-		exit 1
-	elif [ "$sys" = "SunOS" ]; then
-		echo "Solaris\OpenIndiana\SmartOS is not supported."
-		exit 1
+getSearch()
+{
+	if [ -z "$1" ]; then
+		echo "search [wine ver]"
+		exit 0
 	fi
 	
-	echo $sys | awk '{print tolower($0)}'
+	for file in $CACHE/*.lst; do
+		echo $file
+		grep -F $1 $file | cut -d':' -f2 | cut -d';' -f2
+	done
 }
 
-# https://www.playonlinux.com/wine/binaries/
-# both 32x and 64x
-getPOLWine()
+getInstall()
 {
-		if [ -z "$1" ] || [ -z "$2" ]; then
-			echo "Error getting Play On Linux wine binaries. First or second parametrs is empty. Must be: $0 wine[-staing]-1.5.26 [amd64]"
-		fi
+	if [ -z "$1" ] || [ -z "$2" ]; then
+		echo "install [package_name] [list_name]"
+		exit 0
+	fi
 	
-		GET="https://www.playonlinux.com/wine/binaries/linux-$1/PlayOnLinux-$2-linux-$1.pol"
-		wget -qO - $GET > /tmp/wine.tar.gz
-		cd /tmp
-		tar xvf wine.tar.gz
+	if [ ! -f "$CACHE/$2" ]; then
+		echo "No list named $2."
+		exit 0
+	fi
+	
+	cd $CACHE
+	
+	package=$(grep ';'$1';' $CACHE/$2)
+	[ -z $package ] && echo "No such package $1" && exit 0
+	
+	echo -n "Downloading package..."
+	
+	list=$(echo $2 | sed 's/.lst//g')
+	url=$(cat $LIST | sed 's/.lst//g' | grep $list)
+	file=$(echo $package | cut -d':' -f2 | cut -d';' -f1)
+	
+	[ ! -d "archive" ] && mkdir $CACHE/archive
+	
+	if [ ! -f "archive/wine_$1" ]; then
+		rm -rf archive/wine_$1
+		rm -rf archive/*wine-$1*.tar.gz
+	fi
+	
+	cd archive/
+	
+	echo " Done!"
+	
+	echo -n "Extracting package..."
+	
+	cd wine_$1
+	tar xf $file
+	
+	if [ -d "wineversion" ]; then # pol archive
+		mv wineversion/$1 wine_$1
+	
+		rm -rf wineversion
 		rm -rf playonlinux
 		rm -rf files
-		ver=$(ls wineversion)
-		mv wineversion/* /opt/wine_$ver
-}
-
-# https://dl.winehq.org/wine-builds/debian/pool/main/
-getStagingWine()
-{
-	if [ ! $(which sudo) ] && [ "$(ls -ld $dir | cut -d ' ' -f3)" != "$(whoami)" ]; then
-		echo "Error: $dir allow write root only users and you don't have [sudo] installed in your system. Please, change destanation folder."
-		exit 0
-	fi
-	
-	echo "================================"
-	echo "Downloading lastes wine-staging"
-	echo "================================"
-	echo "\n"
-	echo "Downloading and parsing page..."
-	
-	#black magic starts here
-	dev=$(echo $development | sed 's/\./\\./g') #workaround grep can't filter someting with dot symbol
-	removeTrash=$(html2text -nobs /tmp/wine-staging.html | grep "$dev" | sed '/wine-staging/!d;/'$release'/!d;/dbg/d;/dev/d;/compat/d' | cut -d " " -f 8)
-	
-	wineVersionAmd64=$(echo $removeTrash | cut -d " " -f 3)
-	wineVersionAmd64Libs=$(echo $removeTrash | cut -d " " -f 1)
-	wineVersioni386=$(echo $removeTrash | cut -d " " -f 4)
-	wineVersioni386Libs=$(echo $removeTrash | cut -d " " -f 2)
-	
-	echo "Done!\nDonwloading and unpaking wine..."
-	
-	tmp_dir="/tmp/wine-staging/"
-	mkdir $tmp_dir
-	
-	if [ "$(uname -m)" = "x86_64" ] || [ "$(uname -m)" = "k1om" ]; then
-		echo "Script detected, that your system is amd64, so downloading 64bit wine."
-		echo -n "Downloading and extracting wine..."
-		# getting wine itself
-		touch $tmp_dir$wineVersionAmd64
-		wget -qO - $repo$wineVersionAmd64 > $tmp_dir$wineVersionAmd64
-		dpkg -x $tmp_dir$wineVersionAmd64 $tmp_dir
-		echo " Done!"
-		
-		echo -n "Downloading and extracting libs..."	
-		touch $tmp_dir$wineVersionAmd64Libs
-		touch $tmp_dir$wineVersioni386Libs
-		
-		wget -qO - $repo$wineVersioni386Libs > $tmp_dir$wineVersionAmd64Libs
-		wget -qO - $repo$wineVersionAmd64Libs > $tmp_dir$wineVersioni386Libs
-		
-		dpkg -x $tmp_dir$wineVersionAmd64Libs $tmp_dir
-		dpkg -x $tmp_dir$wineVersioni386Libs $tmp_dir
-		echo " Done!"
 	else
-		echo "Script detected, that your system is i386, so downloading 32bit wine."
-		echo -n "Downloading wine..."
-		touch $tmp_dir$wineVersioni386
-		wget -qO - $repo$wineVersioni386 > $tmp_dir$wineVersioni386
-		dpkg -x $dir$wineVersioni386 $tmp_dir
-		echo " Done!"
-		
-		echo -n "Downloading libs..."
-		touch $tmp_dir$wineVersioni386Libs
-		wget -qO - $repo$wineVersioni386Libs > $tmp_dir$wineVersioni386Libs
-		dpkg -x $tmp_dir$wineVersioni386Libs $tmp_dir
-		echo " Done!"
+		mv $1-"$(uname -m)" wine_$1
 	fi
-	
-	echo "Removing temporary data..."
-	echo "Now script ask for su password (using sudo):"
-	sleep 1
-	sudo mv $tmp_dir"opt/wine-staging" "/opt/wine_"$development
-	
-	rm -rf "/tmp/wine-staging"
-	echo "All done! Your wine version now is $development."
-}
-
-fetchStagingNews()
-{
-	echo -n "Fetch changelog..."
-	
-	#little workaround with asterics, cuz' while read will read asterics as 'all files in directory'
-	curl --silent https://wine-staging.com/news.html | html2text -nobs -style pretty | sed 's/*/-/g' > /tmp/wine_staging_news
 	
 	echo " Done!"
 	
-	while read -r LINE; do 
-		[ "$LINE" = "Read_more" ] && break
-		echo $LINE
-	done < /tmp/wine_staging_news | sed '1,20d'
-	
-	rm /tmp/wine_staging_news
-}
-
-askStagingWine()
-{
-	stagingStab
-	echo -n "Parsing page, be patient..."
-	# get wine-hq page to get current wine versions
-	wget -qO - $repo > /tmp/wine-staging.html
-	development=$(html2text -nobs /tmp/wine-staging.html | awk '/wine-staging/ && /'$release'/ {print $2}' | sed 's/[a-Z]*[-_~]//g;s/i386.deb//g;$!d')
+	echo -n "Installing package..."
 	echo " Done!"
- 
-	if [ "wine_$development" = "$wine_ver_get" ]; then
-		echo "You have lastes wine staging version at this moment: $development"
-		rm /tmp/wine-staging.html
-		exit 0
-	else
-		echo 'New version ('$development') are avalable!\n'
-		[ "$1" != "-N" ] && fetchStagingNews
-		echo '\n'
-		
-		if ask 'Do you want to download it?'; then
-			getStagingWine
-		fi
-	fi
 }
 
-stagingStab()
-{
-	echo "Ok, so, wine-staging is dead (see https://www.wine-staging.com/news/2018-02-17-future-wine-staging.html), and news isn't there anymore. But we has a fork (https://github.com/wine-staging/wine-staging). I can't parse the page and get lastes changelog from page. And by a state of 20 february 2018 there is no new packages for Debian in repo. I will remove this stab when new release appears in repo, and\or when site will be active again."
-	echo "Exit now..."
+if [ "$1" = "-v" ]; then
+	echo "WINE helper version is $VER"
 	exit 0
-}
-
-fetchMachine
-
-if [ "$1" = "staging" ]; then
-	askStagingWine $2
-elif [ "$1" = "pol" ]; then
-	die
-	getPOLWine "$2" "$3"
-elif [ "$1" = "--help" ]; then
+elif [ "$1" = "-h" ]; then
 	help
 	exit 0
-else
-	#fetchSystem
-	askStagingWine $2
+elif [ "$1" = "install" ]; then
+	getInstall $2 $3
+elif [ "$1" = "update" ]; then
+	getUpdate
+elif [ "$1" = "search" ]; then
+	getSearch $2
 fi
-
-[ -f "/tmp/wine-staging.html" ] && rm /tmp/wine-staging.html

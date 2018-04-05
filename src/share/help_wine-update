@@ -1,9 +1,9 @@
---help%Display this help and exit
+-h%Display this help and exit
+-v%Display wine-helper version and exit
 %
 Commands:
 %
-staging [-N]%Get wine-staging from official repository 
--%(only for Debian or Debian-like, becouse of dependencies). 
--%The -N option disable fetching the lastes changelog, if new version avalable.
-pol [wine_version] [i386 (amd64)]%Get specific Play On Linux wine
+install [package_name] [list_name]%Install package from PoL or Lutris
+update%Update lists
+search [package_regex]%Search for package
 %
