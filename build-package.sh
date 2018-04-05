@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VER="1.11.0"
+VER="1.12.0"
 
 mkdir -p deb/usr/local/bin
 mkdir -p deb/usr/local/lib/wine_helper
