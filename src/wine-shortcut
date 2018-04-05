@@ -86,8 +86,6 @@ if [ "$1" = "-a" ] || [ "$1" = "--auto" ]; then
 			cp icon.png "${_pwd}"
 			cd "${_pwd}"
 			
-			exit 0
-			
 			rm -rf wine-exe
 			icon="${PWD}/icon.png"
 		fi
