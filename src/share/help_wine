@@ -5,15 +5,19 @@
 --version%Output version information and exit
 --patches%Output patch information and exit
 --check-libs%Checks if shared libs are installed
--p, --prefix%Set wine prefix (similar to use WINEPREFIX=...)
--a, --arch%Set wine arch (similar to use ARCH=...)
--wvs, --wine-version-set%Set wine version to use
+-p=[.wine64], --prefix=[.wine64]%Set wine prefix (similar to use WINEPREFIX=...)
+-a=[win32], --arch=[win32]%Set wine arch (similar to use ARCH=...)
+-wvs=[2.21.0], --wine-version-set=[2.21.0]%Set wine version to use (see README)
 --check-wine-version%Check if wine-starging need to be updated (similar to wine-update)
 -k, --kill%Try to kill wineserver
 -sm, --use-shared-memory-varible%Wine Staging can optimize some wineserver calls by using shared memory
 -wc, --write-copy%Can be used to simulate the memory management system of Windows more precisely. On Wine it will have no effect on the memory usage, but an application can check if a dll was already modified in the current process and some programs (for example Voobly) fail if this information is incorrect.
 --delete-junk-associations%Delete junk associations with files in current WINE prefix
 -d, -debug%Off winedebug (similar to WINEDEBUG=-all)
+-fps%Will run wine with glxosd, will be ignore if glxosd don't installed
+-desktop=[1280x1024]%Will run wine in desktop mode for session, without argument will use resolution detected by randr
+-noinet%Disable internet for session using firejail, will be ignored if no firejail installed
+-csmt=[1 or 0]%Disable or enable CSMT, works for both staging and "vanila" wine
 %
 Some WINE default varibles:
 %
