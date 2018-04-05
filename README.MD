@@ -14,12 +14,8 @@ I position this as Play On Linux without bloatnes and dependencies like Python a
 - Enable or disable CMST for both vanila and staging wine (TODO)
 
 ## wine-update
-- Downloading and install any version from POL (Including Linux, FreeBSD, Darwin all x86\x86_64) (TODO)
-
-N/A 20 february 2018 ded:
-- Downloading and install lastes wine staging (Debian-based\Ubuntu-based\Mint-based only)
-- Fetching lastes changelog for staging
-
+- Downloading and install any version from POL for Linux (Including FreeBSD, Darwin all x86\x86_64: TODO)
+- Downloading and install any version from Lutris (for Linux only)
 
 ## wine-shortcut
 - Create shortcut with wine exec. Like:

@@ -25,6 +25,7 @@ EOF
 cp src/wine* deb/usr/local/bin
 cp src/libs/wine* deb/usr/local/lib/wine_helper
 cp src/share/help* deb/usr/local/share/wine_helper
+cp src/share/sources.list deb/usr/local/etc/wine_helper
 cp src/share/settings.conf deb/usr/local/etc/wine_helper
 sudo chown root:root  deb/usr/local/bin/*
 sudo chown root:root  deb/usr/local/lib/wine_helper/*
