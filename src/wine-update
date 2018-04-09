@@ -3,7 +3,7 @@
 . /usr/local/lib/wine_helper/wine_helper_global.shlib
 . $conf
 
-LIST=/usr/local/share/wine_helper/sources.list
+LIST=/usr/local/etc/wine_helper/sources.list
 CACHE=$HOME/.cache/wine
 
 getUpdate()
@@ -80,12 +80,15 @@ getInstall()
 	fi
 	
 	cd archive/
+	mkdir wine_$1
+	cd wine_$1
+	
+	wget "$url/$file"
 	
 	echo " Done!"
 	
 	echo -n "Extracting package..."
 	
-	cd wine_$1
 	tar xf $file
 	
 	if [ -d "wineversion" ]; then # pol archive
