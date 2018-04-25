@@ -122,7 +122,7 @@ export STAGING_WRITE_COPY=$wc
 export WINEPREFIX=$WINEPREFIX
 export ARCH=$ARCH
 export WINEDEBUG=$WINEDEBUG
-export WINEDLLOVERRIDES="mscoree,mshtml="
+#export WINEDLLOVERRIDES="mscoree,mshtml="
 
 if [ -z "$WINEDEBUG" ]; then
 	if [ "$ww" = "wine" ]; then
@@ -136,14 +136,14 @@ if [ -z "$WINEDEBUG" ]; then
 fi
 
 if [ "$sandboxing" = "true" ]; then
-	WINEPREFIX=$WINEPREFIX $runtime $wine_path/$ww wineboot
+	WINEDLLOVERRIDES="mscoree,mshtml=" WINEPREFIX=$WINEPREFIX $runtime $wine_path/$ww wineboot
 	WINEPREFIX=$WINEPREFIX wine-tools -s
 fi
 
 wine_ver=$(echo $wine_path | awk -F'wine_' '{gsub("/bin",""); print $2}')
 echo "Running wine verion $wine_ver"
 
-WINEDLLOVERRIDES=$WINEDLLOVERRIDES
+#WINEDLLOVERRIDES=$WINEDLLOVERRIDES
 
 $runtime $fps $wine_path/$ww $explorer $@
 
