@@ -1,0 +1,137 @@
+#!/bin/sh
+
+#
+# This tool is now depricated
+# Well, it's not actually supported anyway
+# The only (semi-supported) wine's builds is here https://lutris.net/files/runners/
+#
+
+PVER=0.1
+
+. /usr/local/lib/wine_helper/wine_helper_global.shlib
+. $conf
+
+CACHE=$HOME/.cache/wipkg
+
+getUpdate()
+{
+	echo -n "Getting updates..."
+	
+	[ ! -d "$CACHE" ] && mkdir $CACHE
+	
+	while read -r LINE; do
+		[ "$(echo $LINE | cut -c1)" = "#" ] && continue
+		[ ! -f "$CACHE/$(basename $LINE)" ] && rm "$CACHE/$(basename $LINE)"
+		curl --silent $LINE -o "$CACHE/$(basename $LINE)"
+	done < /home/volk/Projects/wine-helper-script/src/share/sources.list
+	
+	if [ "$1" = "-t" ]; then 
+		wine-install --self-update
+		wine-install list-all > /tmp/tricks-list
+		cat /tmp/tricks-list | sed '1d;2d;3d;4d;5d' > /tmp/tricks-list-clean
+		
+		rm /tmp/tricks-list
+		
+		while read -r LINE; do 
+			[ "$LINE" = "===== prefix =====" ] && break
+			echo $LINE | awk '{print $1}'
+		done < /tmp/tricks-list-clean > /tmp/tricks-list
+		
+		rm /tmp/tricks-list-clean	
+		mv /tmp/tricks-list $CACHE
+	fi
+	
+	echo " Done."
+}
+
+getSearch()
+{
+	grep $1 $CACHE/* | cut -d':' -f2 | cut -d';' -f2
+}
+
+getInstallPol()
+{
+	package=$(grep ';'$1';' $CACHE/* | grep amd64)
+	[ -z $package ] && echo "No such package $1" && exit 0
+	
+	echo -n "Downloading package..."
+	
+	url=$(cat /home/volk/Projects/wine-helper-script/src/share/sources.list | grep amd64 | sed 's/.lst//g')
+	file=$(echo $package | cut -d':' -f2 | cut -d';' -f1)
+	#md5=$(echo $package | cut -d':' -f2 | cut -d';' -f3)
+	
+	mkdir $CACHE/archive
+	wget -qO - "$url/$file" > "$CACHE/archive/$file"
+	
+	#if [ "$(md5sum $CACHE/archive/$file | cut -d' ' -f1)" != "$md5" ]; then
+	#	echo "md5 sums are not same!"
+	#	echo ""
+	#	echo "$(md5sum $CACHE/archive/$file | cut -d' ' -f1)"
+	#	echo "vs"
+	#	echo "$md5"
+	#	echo ""
+	#	echo "You can check by yourself in $CACHE/archive/$file . Aborting."
+	#	exit 0
+	#fi
+	
+	echo " Done!"
+	
+	echo -n "Extracting package..."
+	
+	cd $CACHE/archive/
+	tar xf $file
+	
+	mv wineversion/$1 wine_$1
+	
+	rm -rf wineversion
+	rm -rf playonlinux
+	rm -rf files
+	
+	echo " Done!"
+	
+	echo -n "Installing package..."
+	echo " Done!"
+}
+
+getInstallWpk()
+{
+	echo -n "Extracting package..."
+	mkdir $CACHE/archive
+	tar xf $1 -C $CACHE/archive
+	echo " Done!"
+	
+	echo -n "Searching dependencies..."
+	echo " Done!"
+	
+	echo -n "Installing package..."
+	echo " Done!"
+}
+
+getInstall()
+{
+	getInstallPol $1
+}
+
+getRemove()
+{
+	echo ""
+}
+
+if [ "$1" = "-v" ]; then
+	echo "WINE helper version is $VER"
+	echo "wipkg - WINE package manager - $PVER"
+	exit 0
+elif [ "$1" = "-h" ]; then
+	help
+	exit 0
+elif [ "$1" = "-f" ]; then
+	getInstallWpk $2
+elif [ "$1" = "install" ]; then
+	getInstall $2
+elif [ "$1" = "update" ]; then
+	getUpdate $2 $3
+elif [ "$1" = "search" ]; then
+	getSearch $2
+elif [ "$1" = "remove" ]; then
+	getRemove $2
+fi

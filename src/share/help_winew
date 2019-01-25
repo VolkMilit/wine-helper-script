@@ -10,14 +10,13 @@
 -wvs=[2.21.0], --wine-version-set=[2.21.0]%Set wine version to use (see README)
 --check-wine-version%Check if wine-starging need to be updated (similar to wine-update)
 -k, --kill%Try to kill wineserver
--sm, --use-shared-memory-varible%Wine Staging can optimize some wineserver calls by using shared memory
--wc, --write-copy%Can be used to simulate the memory management system of Windows more precisely. On Wine it will have no effect on the memory usage, but an application can check if a dll was already modified in the current process and some programs (for example Voobly) fail if this information is incorrect.
+-esync%Enable esync (tkg build only)
+-pba%Enable pba (tkg build only)
 --delete-junk-associations%Delete junk associations with files in current WINE prefix
 -d, -debug%Off winedebug (similar to WINEDEBUG=-all)
--fps%Will run wine with glxosd, will be ignore if glxosd don't installed
+-fps%Enable DXVK hud (only works with DX10\11 games)
 -desktop=[1280x1024]%Will run wine in desktop mode for session, without argument will use resolution detected by randr
 -noinet%Disable internet for session using firejail, will be ignored if no firejail installed
--csmt=[1 or 0]%Disable or enable CSMT, works for both staging and "vanila" wine
 %
 Some WINE default varibles:
 %
@@ -25,6 +24,9 @@ NORUNTIME=[any value]%Don't use runtime at all
 WINEPREFIX=/prefix/path%Use specific prefix
 WINEARCH=win32%Use wine 32bit prefix
 ARCH=win32%Use 32bit wine binaries
+WINEESYNC=1%Enable esync (tkg build only)
+PBA_ENABLE=1%Enable pba (tkg build only)
+DXVK_HUD=fps%Enable fps overlay of DXVK
 WINEDLLOVERRIDES=[dlls]%Override dlls, e.g.:
 'd3dx9=n,b;C:\user\d3dx9=b;...',
 n -- native, b -- blutin

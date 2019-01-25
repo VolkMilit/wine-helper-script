@@ -1,5 +1,15 @@
 #!/bin/sh
 
+#
+# This tool is now depricated
+# I will update it when I have more time, it will install some old lutris wine builds
+# to save compability with old software
+#
+
+echo "DEPRICATED! Please don't use this tool!"
+echo "If you want old wine, intall Lutris buils from https://lutris.net/files/runners/ in opt and use wine-wrapper"
+exit
+
 . /usr/local/lib/wine_helper/wine_helper_global.shlib
 . $conf
 
@@ -104,6 +114,9 @@ getInstall()
 	echo " Done!"
 	
 	echo -n "Installing package..."
+	
+	sudo cp -r wine_$1 $dir
+	
 	echo " Done!"
 }
 

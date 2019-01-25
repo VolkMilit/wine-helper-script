@@ -3,11 +3,11 @@
 . /usr/local/lib/wine_helper/wine_helper_global.shlib
 . $conf
 
-wine_ver_get=$(ls $dir | sort --version-sort | sed '/wine/!d;$!d') # get the lasted version of wine in dir, e.g. wine_1.8.0
-wine_path=$dir$wine_ver_get"/bin/"
+wine_ver_get=$(ls $dir | sort -n | sed '/wine/!d;$!d') # get the lasted version of wine in dir, e.g. wine_1.8.0
+wine_path=$dir/$wine_ver_get/bin
 
 if [ -z $(which winetricks) ]; then
-	curl -# https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks -o $HOME/.local/bin/winetricks
+	curl - https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks -o $HOME/.local/bin/winetricks
 	chmod +x $HOME/.local/bin/winetricks
 fi
 
@@ -16,12 +16,12 @@ fi
 for i in "$@"; do
 	case $i in
 		-wvs=*|--wine-ver-set=*)
-		wine_path=$dir"wine_${i#*=}/bin/"
+		wine_path=$dir"wine_${i#*=}/bin"
 		shift
 		;;
 		
 		-p=*|--prefix=*)
-		WINEPREFIX=$wine_prefixes_dir"${i#*=}"
+		WINEPREFIX=$wine_prefixes_dir/"${i#*=}"
 		shift
 		;;
 		
@@ -29,22 +29,14 @@ for i in "$@"; do
 		ARCH="${i#*=}"
 		shift
 		;;
-		
-		*)
-		#help
-		#exit 0
-		;;
 	esac
 done
 
 [ -z "$WINEPREFIX" ] && WINEPREFIX=$wine_prefixes_dir$default_prefix
-[ -z "$NORUNTIME" ] && RUNTIME=$runtime
-prefix=`awk -F "=" '/#arch/ {print $2}' $WINEPREFIX/user.reg`
+prefix=$(awk -F "=" '/#arch/ {print $2}' $WINEPREFIX/user.reg)
 
-#if [ ! -z "$ARCH" ] || [ "$prefix" = "win32" ]; then
-	ww="wine"
-#else
-#	ww="wine64"
-#fi
+export WINEPREFIX=$WINEPREFIX 
+export WINE=$wine_path/wine
+export WINESERVER=$wine_path/wineserver
 
-WINEPREFIX=$WINEPREFIX WINE=$wine_path$ww WINESERVER=$wine_path"wineserver" $RUNTIME winetricks $1
+$runtime winetricks "$@"

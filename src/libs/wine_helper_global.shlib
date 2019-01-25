@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VER="1.12.0"
+VER="1.13.0"
 
 SHARED_DIR=/usr/local/share/wine_helper
 ETC_DIR=/usr/local/etc/wine_helper

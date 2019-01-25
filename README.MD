@@ -1,36 +1,40 @@
-# wine script v1.12.0
+# wine script v1.13.0
 
 Just a little sh scripts, debian package and a bash\zsh compiletion module for my personal use. Maybe someone will find it useful.
 I position this as Play On Linux without bloatnes and dependencies like Python and GTK, because I don't need this. Actually it doesn't have some POL futures, but who cares, when you may use standart wine tools?
 
-## wine
+Now support both Debian and Arch Linux. For example, I use AUR overlay to install wine-tkg in /opt and at the same time I have wine-staging installed in /usr. Unfortunately it break current installations, but you can now use Debian with stable wine.
+
+### winew
+winew abbreviation for wine-wrapper.
 - Main binary, that actually running right version of wine, prefix and arch
 - Kill wineserver just by typing: $ wine -k
 - Restore native resolution if resolution was change
-- Running application in desktop mode
 - Using runtime library (like steam runtime) for not to install all that x86 library in system
-- Cut off internet connection by one option (need firejail) (TODO)
 - Delete all reference to $HOME directory automaticly, if this option is enable in settings.conf
+- Running application in desktop mode
+- Cut off internet connection by one option (need firejail) (TODO)
 - Enable or disable CMST for both vanila and staging wine (TODO)
+- Enable esync or pba or both
+- Enable DXVK fps overlay
 
-## wine-update
-- Downloading and install any version from POL for Linux (Including FreeBSD, Darwin all x86\x86_64: TODO)
-- Downloading and install any version from Lutris (for Linux only)
+### wine-update
+DEPRICATED
 
-## wine-shortcut
+### wine-shortcut
 - Create shortcut with wine exec. Like:
 cd /folder_with_exe; wine -p=prefix exe
 - Detect unity game and add render option (can be configured through settings.conf)
 
-## wine-install
+### wine-install
 - Call winetricks with right wine and prefix
 
-## wine-tools
+### wine-tools
 Various tools to make life easier:
 - Delete junk associations with useless wine soft. Why do you need them, if you're using *NIX, right?
 - Sandboxing prefix by delete all links to $HOME without needed to using winetricks
 
-## Configure file
+### Configure file
 First you need to copy settings.conf from /usr/local/etc/wine_helper to $HOME/.config/wine_helper/ . Using in-file instructions configure it.
 
 ## Dependings
@@ -50,7 +54,15 @@ Need for wine-shortcut
 Sugession:
 - firejail
 - winetricks (wine-install can download by himself)
-- glxosd
+
+## Build package
+### Debian and derevatives
+- Run build-package.sh
+- Install wine_helper_ver.deb
+
+### Arch and derevatives
+- Run makepkg
+- Install wine_helper.tar.xz
 
 ## License
 WTFPL v2

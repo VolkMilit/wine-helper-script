@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VER="1.12.0"
+VER="1.13.0"
 
 mkdir -p deb/usr/local/bin
 mkdir -p deb/usr/local/lib/wine_helper
@@ -14,7 +14,7 @@ Version: $VER
 Section: otherosfs
 Architecture: all
 Installed-Size: 29.1K
-Depends: bash | sh | dash, awk, sed, wget, curl, html2text
+Depends: bash | sh | dash, awk, sed, curl
 Suggests: wine | wine-staging, winetricks
 Priority: optional
 Maintainer: Volk_Milit <javirrdar@gmail.com>
@@ -25,7 +25,6 @@ EOF
 cp src/wine* deb/usr/local/bin
 cp src/libs/wine* deb/usr/local/lib/wine_helper
 cp src/share/help* deb/usr/local/share/wine_helper
-cp src/share/sources.list deb/usr/local/etc/wine_helper
 cp src/share/settings.conf deb/usr/local/etc/wine_helper
 sudo chown root:root  deb/usr/local/bin/*
 sudo chown root:root  deb/usr/local/lib/wine_helper/*

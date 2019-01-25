@@ -78,6 +78,9 @@ if [ "$1" = "-a" ] || [ "$1" = "--auto" ]; then
 			if [ -d ".rsrc/1033/ICON" ]; then
 				cd ".rsrc/1033/ICON"
 				convert $(ls -1 | sort -nu | head -n1) icon.png
+			elif [ -d ".rsrc/ICON" ]; then
+				cd ".rsrc/ICON"
+				convert $(ls -1 | sort -nu | head -n1) icon.png
 			else
 				cd ".rsrc/0/ICON"
 				convert $(ls -1 | sort -nu | tail -1) icon.png
