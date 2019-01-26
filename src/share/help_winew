@@ -12,6 +12,7 @@
 -k, --kill%Try to kill wineserver
 -esync%Enable esync (tkg build only)
 -pba%Enable pba (tkg build only)
+-s, --system%Use system wine (e.g. installed in /usr/bin not in /opt)
 --delete-junk-associations%Delete junk associations with files in current WINE prefix
 -d, -debug%Off winedebug (similar to WINEDEBUG=-all)
 -fps%Enable DXVK hud (only works with DX10\11 games)

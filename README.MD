@@ -17,6 +17,7 @@ winew abbreviation for wine-wrapper.
 - Enable or disable CMST for both vanila and staging wine (TODO)
 - Enable esync or pba or both
 - Enable DXVK fps overlay
+- Separate wine usage, for example use system wine (e.g. installed in /usr, not in /opt)
 
 ### wine-update
 DEPRICATED
@@ -43,10 +44,8 @@ Need for all binary:
 - sed >= 4.x.x
 - (g)awk >= 4.x
 
-Need only for wine-install and wine-update
-- wget >= 1.xx
+Need only for wine-install
 - curl
-- html2text
 
 Need for wine-shortcut
 - p7zip-full
