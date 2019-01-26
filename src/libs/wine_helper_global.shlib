@@ -19,7 +19,7 @@ help()
 	echo "wine-scripts-helper $VER
 Usage: $wine [ARGUMENTS...] PROGRAM [PROGRAM ARGUMENTS...]
 
-$(column -tx -s'%' $SHARED_DIR/help_$wine)
+$(column --table -s'%' $SHARED_DIR/help_$wine)
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY (c) 2015-$(date +'%Y') Volk_Milit (aka Ja'Virr-Dar)"
