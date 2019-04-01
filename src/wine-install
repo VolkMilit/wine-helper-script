@@ -6,11 +6,6 @@
 wine_ver_get=$(ls $dir | sort -n | sed '/wine/!d;$!d') # get the lasted version of wine in dir, e.g. wine_1.8.0
 wine_path=$dir/$wine_ver_get/bin
 
-if [ -z $(which winetricks) ]; then
-	curl - https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks -o $HOME/.local/bin/winetricks
-	chmod +x $HOME/.local/bin/winetricks
-fi
-
 [ "$1" = "-h" ] && help && exit 0
 
 for i in "$@"; do
