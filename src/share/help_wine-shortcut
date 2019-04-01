@@ -2,7 +2,10 @@
 -i, --icon%Set icon
 -e, --exec%Set execution
 -p, --prefix%Set prefix
+-pba%Enable pba
+-esync%Enable esync
 %
 or
 %
 -a, --auto [exe]%Try auto mode (may not work as expected)
+You can also use all options listed above with auto mode.

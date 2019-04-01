@@ -1,9 +1,0 @@
--h%Display this help and exit
--v%Display wine-helper version and exit
-%
-Commands:
-%
-install [package_name] [list_name]%Install package from PoL or Lutris
-update%Update lists
-search [package_regex]%Search for package
-%
