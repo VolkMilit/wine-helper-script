@@ -2,28 +2,74 @@
 
 . /usr/local/lib/wine_helper/wine_helper_global.shlib
 
-# horrible hacks starts here
+if [ -z "$1" ]; then
+	help
+	exit 0
+fi
 
-if [ "$1" = "-a" ] || [ "$1" = "--auto" ]; then
-	ind=0
-	num=0
-	prefix=".wine_tesv" #need to be configurable
+prefix=".wine_tesv"
+pba=""
+esync=""
+
+for i in "$@"; do
+	case $i in
+		-a|--auto)
+		auto=1
+		shift
+		;;
 	
-	#Yeah, I dunno.
-	#for i in $exe_list
-	#mess up files with spaces, so I write this horrible hack.
-	find . -maxdepth 1 -type f -name "*.exe" | sed 's/\.\///g' > /tmp/wine_exe
+		-n=*|--name=*)
+		name="${i#*=}"
+		shift
+		;;
+		
+		-e=*|--exec=*)
+		exe="${i#*=}"
+		shift
+		;;
+		
+		-i=*|--icon=*)
+		icon="${i#*=}"
+		shift
+		;;
+		
+		-p=*|--prefix=*)
+		prefix="${i#*=}"
+		shift
+		;;
+		
+		-pba)
+		pba="-pba"
+		shift
+		;;
+		
+		-esync)
+		esync="-esync"
+		shift
+		;;
+		
+		-h|--help)
+		help
+		exit 0
+		;;
+	esac
+done
+
+if [ ! -z "$auto" ]; then
+	num=0
+	
+	exes=$(find . -maxdepth 1 -type f -name "*.exe" | sed 's/.\///g')
 	
 	if [ -z $2 ]; then
 		echo "You did't specify exe path. Choose one of these:"
 		
-		while read LINE; do 
-			echo $((ind=ind+1)) $LINE; 
-		done < /tmp/wine_exe
+		echo $exes | awk -F' ' '{
+			for (i = 1; i <= 4; ++i) 
+				print i ": " $i
+			}'
 		
 		read num
-		exe=$(awk 'NR=='$num < /tmp/wine_exe)
-		rm /tmp/wine_exe
+		exe=$(echo $exes | awk '{print $'$num'}')
 	else
 		exe=$2
 	fi
@@ -54,12 +100,10 @@ if [ "$1" = "-a" ] || [ "$1" = "--auto" ]; then
 	#We just need 7z to extract PE.
 	#Ether way, we can search for icon in game directory and\or in $HOME/.local/share/icons/hicolor/32x32/apps
 	
-	icon=$(find $HOME/.local/share/icons/hicolor/32x32/apps -name "*$(echo $exe | sed 's/.exe//g').0.png")
+	icon=$(find $HOME/.local/share/icons/hicolor/32x32/apps -name "*$(echo $exe | sed 's/.exe//g').0.png" | head -n1)
 	
 	if [ -z "$icon" ]; then
-		if [ -f "${PWD}/icon.png" ]; then #just in case
-			icon=${PWD}/icon.png
-		elif [ -f "${PWD}/icon.ico" ]; then
+		if [ -f "${PWD}/icon.ico" ]; then
 			convert "${PWD}/icon.ico" "${PWD}/icon.png"
 			icon=${PWD}/icon.png
 		elif [ "$(ls | grep -i ico)" != "" ]; then
@@ -93,44 +137,26 @@ if [ "$1" = "-a" ] || [ "$1" = "--auto" ]; then
 			icon="${PWD}/icon.png"
 		fi
 	fi
+	
+	if [ -z "$esync" ]; then
+		num=0
+		echo "Enable esync?"
+		echo "0: No"
+		echo "1: Yes"
+		read num
 		
-elif [ "$1" = "" ]; then
-	help
-	exit 0
-else
-	for i in "$@"; do
-		case $i in
-			-n=*|--name=*)
-			name="${i#*=}"
-			shift
-			;;
+		[ $num == 1 ]; esync="-esync"
+	fi
+	
+	if [ -z "$pba" ]; then
+		num=0
+		echo "Enable pba?"
+		echo "0: No"
+		echo "1: Yes"
+		read num
 		
-			-e=*|--exec=*)
-			exe="${i#*=}"
-			shift
-			;;
-		
-			-i=*|--icon=*)
-			icon="${i#*=}"
-			shift
-			;;
-		
-			-p=*|--prefix=*)
-			prefix="${i#*=}"
-			shift
-			;;
-		
-			-h|--help)
-			help
-			exit 0
-			;;
-			
-			*)
-			help
-			exit 0
-			;;
-	esac
-	done
+		[ $num == 1 ]; pba="-pba"
+	fi
 fi
 
 #Unity specific, better works in wine
@@ -149,7 +175,7 @@ cat > $file <<EOF
 [Desktop Entry]
 Encoding=UTF-8
 Name=$name
-Exec=sh -c 'cd "${PWD}"; wine -d -p=$prefix $exe $options'
+Exec=sh -c 'cd "${PWD}"; winew -p=$prefix -d $pba $esync $exe $options'
 Icon=$icon
 Categories=Game;
 
